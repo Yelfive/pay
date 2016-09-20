@@ -1,0 +1,14 @@
+{
+  "name": "fk/pay",
+  "licence": "MIT",
+  "type": "library",
+  "require": {
+    "php": ">=5.4"
+  },
+  "minimum-stability": "dev-master",
+  "autoload": {
+    "psr4": {
+      "fk\\pay": ""
+    }
+  }
+}
