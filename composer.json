@@ -5,9 +5,9 @@
   "require": {
     "php": ">=5.4"
   },
-  "minimum-stability": "dev-master",
+  "minimum-stability": "dev",
   "autoload": {
-    "psr4": {
+    "psr-4": {
       "fk\\pay": ""
     }
   }
