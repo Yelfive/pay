@@ -9,7 +9,6 @@ use fk\pay\lib\wechat\Pay;
 use fk\pay\lib\wechat\Result;
 use fk\pay\lib\wechat\TransferData;
 use fk\pay\lib\wechat\UnifiedOrderData;
-use yii\base\Configurable;
 
 /**
  * @author Felix Huang <yelfivehuang@gmail.com>
@@ -18,7 +17,7 @@ use yii\base\Configurable;
  * @property string $notifyUrl @see $notifyPath
  * @property string $channel @see $notifyPath
  */
-class Component implements Configurable
+class ComponentBase
 {
 
     /**
@@ -40,10 +39,14 @@ class Component implements Configurable
 
     public function __construct($config = [])
     {
-        if (empty($config['notifyPath'])) throw new Exception('Property notifyPath must be set and must not be empty');
-        $this->notifyPath = $config['notifyPath'];
-        $this->platforms = new Platform($config['platforms']);
-        $this->with($config['channel'] ?? null);
+        if ($config) {
+            if (empty($config['notifyPath'])) throw new Exception('Property notifyPath must be set and must not be empty');
+            if (empty($config['platforms'])) throw new Exception('Configure for platforms must be set and must not be empty');
+
+            $this->notifyPath = $config['notifyPath'];
+            $this->platforms = new Platform($config['platforms']);
+            $this->with($config['channel'] ?? null);
+        }
     }
 
     public function __get($name)
@@ -52,7 +55,21 @@ class Component implements Configurable
         if (method_exists($this, $method)) {
             return $this->$method();
         } else {
-            throw new Exception('Trying to get property of unknown');
+            throw new Exception('Trying to get property of unknown.');
+        }
+    }
+
+    public function __set($name, $value)
+    {
+        switch ($name) {
+            case 'platform':
+                $this->platforms = new Platform($value);
+                break;
+            case 'channel':
+                $this->with($value);
+                break;
+            default:
+                throw new Exception('Trying to set property of unknown.');
         }
     }
 
@@ -97,7 +114,9 @@ class Component implements Configurable
     }
 
     /**
+     * ```yii
      * Yii::$app->pay->with('AliPay')->transfer();
+     * ```
      * @param $channel
      * @return $this
      * @throws Exception
@@ -276,10 +295,19 @@ class Component implements Configurable
         /** @var \fk\pay\notify\NotifyInterface $className */
         $className = "fk\\pay\\notify\\{$channel}Notify";
         if (!class_exists($className)) {
-            \Yii::error('Notify class for channel does not exist. channel: ' . $channel);
+            $this->error('Notify class for channel does not exist. channel: ' . $channel);
         }
         $this->platforms->loadConfigure();
         $className::handle($callback);
+    }
+
+    protected function error($message)
+    {
+        // To be compatible with Yii2
+        // History issue, this is first designed for Yii2
+        if (defined('YII2_PATH')) {
+            \Yii::error($message);
+        }
     }
 
 }

@@ -13,9 +13,15 @@ class Platform
     const CHANNEL_WE_CHAT = 'WeChat';
     const CHANNEL_ALI_PAY = 'AliPay';
 
+    /**
+     * @var array Configure array
+     */
     public $config;
 
-    public function __construct($config)
+    /**
+     * @param array $config
+     */
+    public function __construct(array $config)
     {
         $this->config = $config;
     }
@@ -41,7 +47,7 @@ class Platform
     private $_app;
 
     /**
-     * App name for the specified channel(set by calling Platform::with())
+     * App name for the specified channel(witch is set by calling Platform::with())
      * @param string $name
      * @return $this
      */
@@ -93,35 +99,50 @@ class Platform
         return $this->_app;
     }
 
+    protected function getWeChatConfigureKey()
+    {
+
+    }
+
     protected function loadConfigureOfWeChat($configure)
     {
         $class = '\fk\pay\lib\\' . strtolower($this->channel) . '\Config';
         if ($this->_app) {
-            $wcApp = &$this->_app;
-        } else if (method_exists(\Yii::$app->getRequest(), 'getClient')) {
-            $client = \Yii::$app->getRequest()->getClient();
+            $weChatApp = &$this->_app;
         } else {
-            $client = $this->getClient();
+            $weChatApp = $this->getClient() === 'Web' ? 'web' : 'app';
         }
 
-        if (isset($client)) {
-            $wcApp = $client === 'Web' ? 'web' : 'app';
-        }
-        if (empty($configure[$wcApp])) throw new Exception('Configure for ' . $class . ' is required, while empty given.');
+        if (empty($configure[$weChatApp])) throw new Exception('Configure for ' . $class . ' is required, while empty given.');
 
-        foreach ($configure[$wcApp] as $k => &$v) {
+        foreach ($configure[$weChatApp] as $k => &$v) {
             $property = strtoupper($k);
             if (property_exists($class, $property)) {
                 if (
                     $property == 'SSL_CERT_PATH'
                     || $property == 'SSL_KEY_PATH'
                 ) {
-                    $v = \Yii::getAlias($v);
+                    $v = $this->getFilePath($v);
                 }
                 $class::$$property = $v;
             }
         }
         unset($v);
+    }
+
+    /**
+     * Get file path according to file path alias
+     * @param string $alias
+     * @return string
+     */
+    protected function getFilePath($alias)
+    {
+        // To be compatible with Yii2
+        // History issue, this is first designed for Yii2
+        if (defined('YII2_PATH')) {
+            return \Yii::getAlias($alias);
+        }
+        return $alias;
     }
 
 }

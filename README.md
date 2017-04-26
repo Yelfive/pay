@@ -23,7 +23,7 @@ return [
             'notifyPath' => 'https://api-test.alijian.net/notify/',
             'platforms' => [
                 'WeChat' => [
-                    'js' => [ // Web, a.k.a JS, a.k.a H5 payment
+                    'web' => [ // Web, a.k.a JS, a.k.a H5 payment
                         'app_id' => 'wx71xxx',
                         'app_secret' => 'xxx',
                         'mch_id' => 1234567890,
@@ -35,11 +35,6 @@ return [
                         'app_id' => 'wxxxxx',
                         'mch_id' => 1234567890,
                         'app_secret' => '6exxx',
-                        'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
-                    ],
-                    'enterprise' => [ // Enterprise transfer
-                        'app_id' => 'wx71aaf2ls3j9dj4hs8',
-                        'mch_id' => 1234567890,
                         'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
                         'ssl_cert_path' => '@common/data/cache/apiclient_cert.pem', // to refund
                         'ssl_key_path' => '@common/data/cache/apiclient_key.pem',
