@@ -24,17 +24,17 @@ return [
             'platforms' => [
                 'WeChat' => [
                     'js' => [ // Web, a.k.a JS, a.k.a H5 payment
-                        'app_id' => 'wx71aaf2ls3j9dj4hs8',
-                        'app_secret' => '6e384305d5f409f0ls83j2ajq2k12ms',
+                        'app_id' => 'wx71xxx',
+                        'app_secret' => 'xxx',
                         'mch_id' => 1234567890,
                         'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
                         'ssl_cert_path' => '@common/data/cache/apiclient_cert.pem', // to refund
                         'ssl_key_path' => '@common/data/cache/apiclient_key.pem',
                     ],
                     'app' => [ // App(iOS, Android) payment
-                        'app_id' => 'wx71aaf2ls3j9dj4hs8',
+                        'app_id' => 'wxxxxx',
                         'mch_id' => 1234567890,
-                        'app_secret' => '6e384305d5f409f0ls83j2ajq2k12ms',
+                        'app_secret' => '6exxx',
                         'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
                     ],
                     'enterprise' => [ // Enterprise transfer
