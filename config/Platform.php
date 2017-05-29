@@ -10,33 +10,38 @@ use fk\pay\Exception;
 class Platform
 {
 
-    const CHANNEL_WE_CHAT = 'WeChat';
-    const CHANNEL_ALI_PAY = 'AliPay';
+    const WITH_WE_CHAT = 'WeChat';
+    const WITH_ALI_PAY = 'AliPay';
 
     /**
      * @var array Configure array
      */
-    public $config;
+    public $configs;
 
     /**
-     * @param array $config
+     * @var array
      */
-    public function __construct(array $config)
+    public $specifyConfig;
+
+    /**
+     * @param array $configs
+     */
+    public function __construct(array $configs)
     {
-        $this->config = $config;
+        $this->configs = $configs;
     }
 
-    public $channel;
+    public $with;
 
     /**
      * With which channel
-     * @param string $channel
+     * @param string $platform
      * @return $this
      * @throws Exception
      */
-    public function with($channel)
+    public function with($platform)
     {
-        $this->channel = $channel;
+        $this->with = $platform;
         return $this;
     }
 
@@ -57,17 +62,17 @@ class Platform
         return $this;
     }
 
-    public function loadConfigure()
+    public function loadConfigure(): array
     {
-        $channel = &$this->channel;
-        if ($channel == null) throw new Exception('Miss required parameter: channel');
-        if (empty($this->config[$channel])) throw new Exception('No configuration under such channel: ' . $channel);
+        $platform = &$this->with;
+        if ($platform == null) throw new Exception('Miss required parameter: platform');
+        if (empty($this->configs[$platform])) throw new Exception("No configuration under such platform: $platform");
 
-        $method = "loadConfigureOf{$channel}";
+        $method = "loadConfigureOf{$platform}";
         if (method_exists($this, $method)) {
-            $this->$method($this->config[$channel]);
+            return $this->specifyConfig = $this->$method($this->configs[$platform]);
         } else {
-            throw new Exception('The payment channel is not supported yet: ' . $channel);
+            throw new Exception("The payment platform is not supported yet: $platform");
         }
     }
 
@@ -99,14 +104,9 @@ class Platform
         return $this->_app;
     }
 
-    protected function getWeChatConfigureKey()
-    {
-
-    }
-
     protected function loadConfigureOfWeChat($configure)
     {
-        $class = '\fk\pay\lib\\' . strtolower($this->channel) . '\Config';
+        $class = '\fk\pay\lib\\' . strtolower($this->with) . '\Config';
         if ($this->_app) {
             $weChatApp = &$this->_app;
         } else {
@@ -128,6 +128,22 @@ class Platform
             }
         }
         unset($v);
+        return [];
+    }
+
+    public function loadConfigureOfAliPay()
+    {
+        if (!$this->configs[self::WITH_ALI_PAY]) {
+            throw new Exception('Config for ' . self::WITH_ALI_PAY . ' cannot be empty.');
+        }
+        return $this->specifyConfig = $this->configs[self::WITH_ALI_PAY];
+    }
+
+    public function getConfig()
+    {
+        if (!$this->specifyConfig) $this->loadConfigure();
+
+        return $this->specifyConfig;
     }
 
     /**

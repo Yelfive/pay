@@ -3,6 +3,8 @@
 namespace fk\pay;
 
 use fk\pay\config\Platform;
+use fk\pay\entries\Entry;
+use fk\pay\entries\EntryInterface;
 use fk\pay\lib\wechat\Config;
 use fk\pay\lib\wechat\JsApi;
 use fk\pay\lib\wechat\Pay;
@@ -15,15 +17,16 @@ use fk\pay\lib\wechat\UnifiedOrderData;
  * @method $this setChannel(string $channel)
  *
  * @property string $notifyUrl @see $notifyPath
- * @property string $channel @see $notifyPath
+ * @property string $channel e.g. WeChat, AliPay
+ * @property Platform $platforms
  */
-class ComponentBase
+class Component
 {
 
     /**
      * @var Platform
      */
-    public $platforms;
+    protected $platforms;
 
     /**
      * @var string
@@ -31,22 +34,27 @@ class ComponentBase
      * the actual notify_url will need a prefix of [[platform name]],
      * and end with [[.php]]
      * e.g.
-     * $notifyPath = 'https://api.alijian.net/notify/';
+     * $notifyPath = 'https://your.domain.com/notify/';
      * $channel = 'WeChat';
-     * $notifyUrl will be `https://api.alijian.net/notify/we-chat.php`
+     * $notifyUrl will be `https://your.domain.com/notify/we-chat.php`
+     * @see getNotifyUrl
      */
     public $notifyPath;
 
+    public $returnPath;
+
     public function __construct($config = [])
     {
-        if ($config) {
-            if (empty($config['notifyPath'])) throw new Exception('Property notifyPath must be set and must not be empty');
-            if (empty($config['platforms'])) throw new Exception('Configure for platforms must be set and must not be empty');
+        if (!$config) return;
 
-            $this->notifyPath = $config['notifyPath'];
-            $this->platforms = new Platform($config['platforms']);
-            $this->with($config['channel'] ?? null);
-        }
+        if (empty($config['notifyPath'])) throw new Exception('Property notifyPath must be set and must not be empty');
+        if (empty($config['platforms'])) throw new Exception('Configure for platforms must be set and must not be empty');
+
+        $this->notifyPath = $config['notifyPath'];
+        if (isset($config['returnPath'])) $this->returnPath = $config['returnPath'];
+
+        $this->platforms = new Platform($config['platforms']);
+        $this->with($config['channel'] ?? null);
     }
 
     public function __get($name)
@@ -62,7 +70,7 @@ class ComponentBase
     public function __set($name, $value)
     {
         switch ($name) {
-            case 'platform':
+            case 'platforms':
                 $this->platforms = new Platform($value);
                 break;
             case 'channel':
@@ -103,14 +111,41 @@ class ComponentBase
 
     public function getChannel()
     {
-        return $this->platforms->channel;
+        return $this->platforms->with ?? $this->platforms->with = key($this->platforms->configs);
     }
 
+    public function checkSignature(array $data): bool
+    {
+        return $this->getEntry()->checkSignature($data);
+    }
+
+    protected function getEntry(): Entry
+    {
+        $className = "\\fk\\pay\\entries\\{$this->channel}Entry";
+        if (!class_exists($className)) throw new Exception("Cannot find entry of given entry: $className");
+
+        return new $className();
+    }
+
+    /**
+     * @see notifyPath
+     * @return string
+     */
     public function getNotifyUrl()
     {
-        return $this->notifyPath . preg_replace_callback('/([A-Z])/', function ($word) {
-            return '-' . strtolower($word[1]);
-        }, lcfirst($this->getChannel())) . '.php';
+        return $this->notifyPath ? rtrim($this->notifyPath, '/') . preg_replace_callback('/([A-Z])/', function ($word) {
+                return '-' . strtolower($word[1]);
+            }, lcfirst($this->getChannel())) . '.php'
+            : '';
+    }
+
+    public function getReturnUrl()
+    {
+        return $this->platforms->loadConfigureOfAliPay()['return_url'];
+//        return $this->returnPath ? $this->returnPath . preg_replace_callback('/([A-Z])/', function ($word) {
+//                return '-' . strtolower($word[1]);
+//            }, lcfirst($this->getChannel())) . '.php'
+//            : '';
     }
 
     /**
@@ -145,7 +180,7 @@ class ComponentBase
 
     /**
      * Unified entry for every payment
-     * @param string $orderSn
+     * @param string $orderSN
      * @param float $amount Money
      * @param string $name Goods name
      * @param string $description Goods description
@@ -153,14 +188,23 @@ class ComponentBase
      * @return mixed
      * @throws Exception
      */
-    public function pay($orderSn, $amount, $name, $description, $extra = [])
+    public function pay($orderSN, $amount, $name, $description, $extra = [])
     {
-        $method = "payWith{$this->channel}";
-        if (method_exists($this, $method)) {
-            return $this->invoke($method, [$orderSn, $amount, $name, $description, $extra]);
-        } else {
-            throw new Exception('Channel not supported yet: ' . $this->channel);
+//        $method = "payWith{$this->channel}";
+//        if (method_exists($this, $method)) {
+//            return $this->invoke($method, [$orderSn, $amount, $name, $description, $extra]);
+//        } else {
+//            throw new Exception('Channel not supported yet: ' . $this->channel);
+//        }
+
+        if (($entry = $this->getEntry()) instanceof EntryInterface) {
+            return $entry
+                ->setConfig($this->platforms->loadConfigure())
+                ->setNotifyUrl($this->getNotifyUrl())
+                ->setReturnUrl($this->getReturnUrl())
+                ->pay(...func_get_args());
         }
+        throw new Exception('Entry of given channel is not instance of ' . EntryInterface::class);
     }
 
     protected function invoke($method, $params)
@@ -228,67 +272,67 @@ class ComponentBase
      * @return string
      * @throws Exception
      */
-    protected function payWithWeChat($orderSn, $amount, $name, $description, $extra = [])
-    {
-        $order = new UnifiedOrderData();
-
-        $order->SetBody($name);
-        if (is_array($description)) {
-            if (!isset($description['goods_id'])) throw new Exception('goods_id is required by field "detail"');
-            if (!isset($description['goods_name'])) throw new Exception('goods_name is required by field "detail"');
-            if (!isset($description['goods_num'])) throw new Exception('goods_num is required by field "detail"');
-            if (!isset($description['goods_price'])) throw new Exception('goods_price is required by field "detail"');
-            $description = json_encode($description, JSON_UNESCAPED_UNICODE);
-        }
-        $order->SetDetail($description);
-        $order->SetOut_trade_no($orderSn);
-        $order->SetTotal_fee(round($amount * 100));
-
-        if (!isset($extra['trade_type'])) throw new Exception('Miss required field: "trade_type"');
-        $order->SetTrade_type($extra['trade_type']);
-
-        $order->SetNotify_url($this->getNotifyUrl());
-        // Set extra params
-        foreach ($extra as $k => &$v) {
-            $method = 'Set' . ucfirst($k);
-            if (method_exists($order, $method)) $order->$method($v);
-        }
-
-        $result = Pay::unifiedOrder($order);
-        if ($result['return_code'] === 'FAIL') {
-            throw new Exception($result['return_msg']);
-        } else if ($result['result_code'] === 'FAIL') {
-            throw new Exception("{$result['err_code_des']}({$result['err_code']})");
-        }
-
-        switch ($order->GetTrade_type()) {
-            case Constant::WX_TRADE_TYPE_JS:
-                $model = new JsApi();
-                $data = $model->GetJsApiParameters($result);
-                break;
-            case Constant::WX_TRADE_TYPE_APP:
-                $data = [
-                    'appid' => Config::$APP_ID,
-                    'partnerid' => Config::$MCH_ID,
-                    'prepayid' => $result['prepay_id'],
-                    'package' => 'Sign=WXPay',
-                    'noncestr' => Pay::getNonceStr(),
-                    'timestamp' => $_SERVER['REQUEST_TIME'],
-                ];
-                $wx = new Result();
-                $wx->FromArray($data);
-                $data['sign'] = $wx->MakeSign();
-                // WeChat need `package` as param for payment API,
-                // however, package is a keyword in Android
-                $data['packageValue'] = $data['package'];
-                unset($data['package']);
-                break;
-            default:
-                $data = [];
-        }
-
-        return $data;
-    }
+//    protected function payWithWeChat($orderSn, $amount, $name, $description, $extra = [])
+//    {
+//        $order = new UnifiedOrderData();
+//
+//        $order->SetBody($name);
+//        if (is_array($description)) {
+//            if (!isset($description['goods_id'])) throw new Exception('goods_id is required by field "detail"');
+//            if (!isset($description['goods_name'])) throw new Exception('goods_name is required by field "detail"');
+//            if (!isset($description['goods_num'])) throw new Exception('goods_num is required by field "detail"');
+//            if (!isset($description['goods_price'])) throw new Exception('goods_price is required by field "detail"');
+//            $description = json_encode($description, JSON_UNESCAPED_UNICODE);
+//        }
+//        $order->SetDetail($description);
+//        $order->SetOut_trade_no($orderSn);
+//        $order->SetTotal_fee(round($amount * 100));
+//
+//        if (!isset($extra['trade_type'])) throw new Exception('Miss required field: "trade_type"');
+//        $order->SetTrade_type($extra['trade_type']);
+//
+//        $order->SetNotify_url($this->getNotifyUrl());
+//        // Set extra params
+//        foreach ($extra as $k => &$v) {
+//            $method = 'Set' . ucfirst($k);
+//            if (method_exists($order, $method)) $order->$method($v);
+//        }
+//
+//        $result = Pay::unifiedOrder($order);
+//        if ($result['return_code'] === 'FAIL') {
+//            throw new Exception($result['return_msg']);
+//        } else if ($result['result_code'] === 'FAIL') {
+//            throw new Exception("{$result['err_code_des']}({$result['err_code']})");
+//        }
+//
+//        switch ($order->GetTrade_type()) {
+//            case Constant::WX_TRADE_TYPE_JS:
+//                $model = new JsApi();
+//                $data = $model->GetJsApiParameters($result);
+//                break;
+//            case Constant::WX_TRADE_TYPE_APP:
+//                $data = [
+//                    'appid' => Config::$APP_ID,
+//                    'partnerid' => Config::$MCH_ID,
+//                    'prepayid' => $result['prepay_id'],
+//                    'package' => 'Sign=WXPay',
+//                    'noncestr' => Pay::getNonceStr(),
+//                    'timestamp' => $_SERVER['REQUEST_TIME'],
+//                ];
+//                $wx = new Result();
+//                $wx->FromArray($data);
+//                $data['sign'] = $wx->MakeSign();
+//                // WeChat need `package` as param for payment API,
+//                // however, package is a keyword in Android
+//                $data['packageValue'] = $data['package'];
+//                unset($data['package']);
+//                break;
+//            default:
+//                $data = [];
+//        }
+//
+//        return $data;
+//    }
 
     public function notify($channel, $callback)
     {
