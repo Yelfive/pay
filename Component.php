@@ -29,6 +29,11 @@ class Component
     protected $platforms;
 
     /**
+     * @var Entry
+     */
+    protected $entry;
+
+    /**
      * @var string
      * As for different platforms,
      * the actual notify_url will need a prefix of [[platform name]],
@@ -121,10 +126,18 @@ class Component
 
     protected function getEntry(): Entry
     {
+        if ($this->entry instanceof Entry) return $this->entry;
+
         $className = "\\fk\\pay\\entries\\{$this->channel}Entry";
         if (!class_exists($className)) throw new Exception("Cannot find entry of given entry: $className");
 
-        return new $className();
+        $this->entry = new $className();
+
+        $this->entry
+            ->setConfig($this->platforms->loadConfigure())
+            ->setNotifyUrl($this->getNotifyUrl())
+            ->setReturnUrl($this->getReturnUrl());
+        return $this->entry;
     }
 
     /**
@@ -133,15 +146,23 @@ class Component
      */
     public function getNotifyUrl()
     {
-        return $this->notifyPath ? rtrim($this->notifyPath, '/') . preg_replace_callback('/([A-Z])/', function ($word) {
+        return $this->notifyPath ? rtrim($this->notifyPath, '/') . '/' . preg_replace_callback('/([A-Z])/', function ($word) {
                 return '-' . strtolower($word[1]);
             }, lcfirst($this->getChannel())) . '.php'
             : '';
     }
 
+    protected $returnUrl;
+
+    public function setReturnUrl(string $url)
+    {
+        $this->returnUrl = $url;
+        return $this;
+    }
+
     public function getReturnUrl()
     {
-        return $this->platforms->loadConfigureOfAliPay()['return_url'];
+        return $this->returnUrl ?: $this->platforms->loadConfigureOfAliPay()['return_url'];
 //        return $this->returnPath ? $this->returnPath . preg_replace_callback('/([A-Z])/', function ($word) {
 //                return '-' . strtolower($word[1]);
 //            }, lcfirst($this->getChannel())) . '.php'
@@ -198,11 +219,7 @@ class Component
 //        }
 
         if (($entry = $this->getEntry()) instanceof EntryInterface) {
-            return $entry
-                ->setConfig($this->platforms->loadConfigure())
-                ->setNotifyUrl($this->getNotifyUrl())
-                ->setReturnUrl($this->getReturnUrl())
-                ->pay(...func_get_args());
+            return $entry->pay(...func_get_args());
         }
         throw new Exception('Entry of given channel is not instance of ' . EntryInterface::class);
     }
