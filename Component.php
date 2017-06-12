@@ -48,6 +48,11 @@ class Component
 
     public $returnPath;
 
+    /**
+     * @var string Default platform, e.g. WeChat, AliPay
+     */
+    public $defaultPlatform;
+
     public function __construct($config = [])
     {
         if (!$config) return;
@@ -77,6 +82,7 @@ class Component
         switch ($name) {
             case 'platforms':
                 $this->platforms = new Platform($value);
+                if ($this->defaultPlatform) $this->platforms->with($this->defaultPlatform);
                 break;
             case 'channel':
                 $this->with($value);
@@ -179,7 +185,7 @@ class Component
      */
     public function with($channel)
     {
-        if ($channel && $channel !== $this->channel) $this->platforms->with($channel);
+        if ($channel && $this->platforms && $channel !== $this->channel) $this->platforms->with($channel);
         return $this;
     }
 
