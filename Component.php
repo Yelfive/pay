@@ -169,10 +169,6 @@ class Component
     public function getReturnUrl()
     {
         return $this->returnUrl ?: $this->platforms->loadConfigureOfAliPay()['return_url'];
-//        return $this->returnPath ? $this->returnPath . preg_replace_callback('/([A-Z])/', function ($word) {
-//                return '-' . strtolower($word[1]);
-//            }, lcfirst($this->getChannel())) . '.php'
-//            : '';
     }
 
     /**
