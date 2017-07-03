@@ -10,8 +10,6 @@ namespace fk\pay\entries;
 use fk\pay\lib\alipay\wap\service\AliPayTradeService;
 use fk\pay\lib\alipay\wap\builders\AliPayTradeWapPayContentBuilder;
 
-defined('AOP_SDK_WORK_DIR') or define('AOP_SDK_WORK_DIR', dirname(__DIR__) . '/lib/alipay');
-
 class AliPayEntry extends Entry
 {
 
@@ -34,6 +32,11 @@ class AliPayEntry extends Entry
 
     const NOTIFY_RESULT_SUCCESS = 'success';
     const NOTIFY_RESULT_FAILED = 'failed';
+
+    public function __construct()
+    {
+        defined('AOP_SDK_WORK_DIR') or define('AOP_SDK_WORK_DIR', $this->config['logPath'] ?? dirname(__DIR__) . '/lib/alipay');
+    }
 
     public static function getStatuses()
     {
@@ -62,7 +65,7 @@ class AliPayEntry extends Entry
      * @param array $data
      * @return bool
      */
-    public function checkSignature(array $data):bool
+    public function checkSignature(array $data): bool
     {
         $valid = (new AliPayTradeService($this->config))->check($data);
         return is_bool($valid) ? $valid : false;
