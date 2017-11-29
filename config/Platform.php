@@ -64,7 +64,7 @@ class Platform
 
     public function loadConfigure(): array
     {
-        $platform = &$this->with;
+        $platform = $this->with;
         if ($platform == null) throw new Exception('Miss required parameter: platform');
         if (empty($this->configs[$platform])) throw new Exception("No configuration under such platform: $platform");
 
@@ -133,7 +133,7 @@ class Platform
 
     public function loadConfigureOfAliPay()
     {
-        if (!$this->configs[self::WITH_ALI_PAY]) {
+        if (empty($this->configs[self::WITH_ALI_PAY])) {
             throw new Exception('Config for ' . self::WITH_ALI_PAY . ' cannot be empty.');
         }
         return $this->specifyConfig = $this->configs[self::WITH_ALI_PAY];

@@ -17,7 +17,7 @@ use fk\pay\lib\wechat\UnifiedOrderData;
  * @method $this setChannel(string $channel)
  *
  * @property string $notifyUrl @see $notifyPath
- * @property string $channel e.g. WeChat, AliPay
+ * @property string $platform e.g. WeChat, AliPay
  * @property Platform $platforms
  */
 class Component
@@ -120,7 +120,7 @@ class Component
         throw new Exception('Unknown method: ' . $name);
     }
 
-    public function getChannel()
+    public function getPlatform()
     {
         return $this->platforms->with ?? $this->platforms->with = key($this->platforms->configs);
     }
@@ -134,7 +134,7 @@ class Component
     {
         if ($this->entry instanceof Entry) return $this->entry;
 
-        $className = "\\fk\\pay\\entries\\{$this->channel}Entry";
+        $className = "\\fk\\pay\\entries\\{$this->platform}Entry";
         if (!class_exists($className)) throw new Exception("Cannot find entry of given entry: $className");
 
         $this->entry = new $className();
@@ -154,7 +154,7 @@ class Component
     {
         return $this->notifyPath ? rtrim($this->notifyPath, '/') . '/' . preg_replace_callback('/([A-Z])/', function ($word) {
                 return '-' . strtolower($word[1]);
-            }, lcfirst($this->getChannel())) . '.php'
+            }, lcfirst($this->getPlatform())) . '.php'
             : '';
     }
 
@@ -168,6 +168,9 @@ class Component
 
     public function getReturnUrl()
     {
+        if ($this->platform == Platform::WITH_WE_CHAT) {
+            return ''; // no need for we chat
+        }
         return $this->returnUrl ?: $this->platforms->loadConfigureOfAliPay()['return_url'];
 //        return $this->returnPath ? $this->returnPath . preg_replace_callback('/([A-Z])/', function ($word) {
 //                return '-' . strtolower($word[1]);
@@ -179,13 +182,13 @@ class Component
      * ```yii
      * Yii::$app->pay->with('AliPay')->transfer();
      * ```
-     * @param $channel
+     * @param $platform
      * @return $this
      * @throws Exception
      */
-    public function with($channel)
+    public function with($platform)
     {
-        if ($channel && $this->platforms && $channel !== $this->channel) $this->platforms->with($channel);
+        if ($platform && $this->platforms && $platform !== $this->platform) $this->platforms->with($platform);
         return $this;
     }
 
@@ -246,13 +249,13 @@ class Component
      */
     public function transfer($orderSn, $id, $amount, $extra)
     {
-        $method = "transferWith{$this->channel}";
+        $method = "transferWith{$this->platform}";
 
         if (method_exists($this, $method)) {
             $this->platforms->loadConfigure();
             return $this->invoke($method, [$orderSn, $id, $amount, $extra]);
         } else {
-            throw new Exception('Channel not supported yet: ' . $this->channel);
+            throw new Exception('Channel not supported yet: ' . $this->platform);
         }
     }
 

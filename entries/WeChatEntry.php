@@ -100,4 +100,8 @@ class WeChatEntry extends Entry
         return $data;
     }
 
+    public function checkSignature(array $data):bool
+    {
+        
+    }
 }
