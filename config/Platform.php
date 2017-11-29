@@ -62,6 +62,11 @@ class Platform
         return $this;
     }
 
+    /**
+     * Returns an array contains all the configure for given payment
+     * @return array
+     * @throws Exception
+     */
     public function loadConfigure(): array
     {
         $platform = $this->with;
