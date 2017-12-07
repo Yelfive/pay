@@ -13,7 +13,7 @@ return [
     'components' => [
         'pay' => [
             'class' => 'fk\pay\Component',
-            'channel' => 'WeChat', // Here is default channel
+            'defaultPlatform' => 'WeChat', // Here is default channel
             // As for different platforms, the actual notify_url will need a prefix of platform name
             // end with .php
             // e.g.

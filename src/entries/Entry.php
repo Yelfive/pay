@@ -7,14 +7,18 @@
 
 namespace fk\pay\entries;
 
+use fk\pay\Exception;
+
 abstract class Entry implements EntryInterface
 {
 
-    public $notifyUrl;
+    protected $notifyUrl;
 
-    public $returnUrl;
+    protected $returnUrl;
 
-    public $config;
+    protected $config;
+
+    protected $app;
 
     public function setConfig(array $config): EntryInterface
     {
@@ -35,4 +39,19 @@ abstract class Entry implements EntryInterface
         $this->returnUrl = $url;
         return $this;
     }
+
+    protected function required($data, $attributes, string $message = null)
+    {
+        if ($message === null) $message = '"{attribute}" is required';
+        foreach ($attributes as $name) {
+            if (!empty($data[$name])) throw new Exception(str_replace('{attribute}', $name, $message));
+        }
+        return true;
+    }
+
+    public function app($name)
+    {
+        $this->app = $name;
+    }
+
 }

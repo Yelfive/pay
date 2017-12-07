@@ -1,24 +1,23 @@
 <?php
 
+/**
+ * @author Felix Huang <yelfivehuang@gmail.com>
+ */
+
 namespace fk\pay;
 
 use fk\pay\config\Platform;
 use fk\pay\entries\Entry;
 use fk\pay\entries\EntryInterface;
-use fk\pay\lib\wechat\Config;
-use fk\pay\lib\wechat\JsApi;
-use fk\pay\lib\wechat\Pay;
-use fk\pay\lib\wechat\Result;
-use fk\pay\lib\wechat\TransferData;
-use fk\pay\lib\wechat\UnifiedOrderData;
+use fk\pay\lib\WeChat\Pay;
+use fk\pay\lib\WeChat\TransferData;
 
 /**
  * @author Felix Huang <yelfivehuang@gmail.com>
- * @method $this setChannel(string $channel)
  *
- * @property string $notifyUrl @see $notifyPath
- * @property string $channel e.g. WeChat, AliPay
- * @property Platform $platforms
+ * @property- string $notifyUrl @see $notifyPath
+ * @property- string $platform e.g. WeChat, AliPay
+ * @property- Platform $platforms
  */
 class Component
 {
@@ -64,7 +63,7 @@ class Component
         if (isset($config['returnPath'])) $this->returnPath = $config['returnPath'];
 
         $this->platforms = new Platform($config['platforms']);
-        $this->with($config['channel'] ?? null);
+        $this->with($this->defaultPlatform = $config['defaultPlatform']);
     }
 
     public function __get($name)
@@ -74,21 +73,6 @@ class Component
             return $this->$method();
         } else {
             throw new Exception('Trying to get property of unknown.');
-        }
-    }
-
-    public function __set($name, $value)
-    {
-        switch ($name) {
-            case 'platforms':
-                $this->platforms = new Platform($value);
-                if ($this->defaultPlatform) $this->platforms->with($this->defaultPlatform);
-                break;
-            case 'channel':
-                $this->with($value);
-                break;
-            default:
-                throw new Exception('Trying to set property of unknown.');
         }
     }
 
@@ -120,9 +104,9 @@ class Component
         throw new Exception('Unknown method: ' . $name);
     }
 
-    public function getChannel()
+    public function getPlatform()
     {
-        return $this->platforms->with ?? $this->platforms->with = key($this->platforms->configs);
+        return $this->platforms->used ?? $this->platforms->with(key($this->platforms->configs));
     }
 
     public function checkSignature(array $data): bool
@@ -134,7 +118,7 @@ class Component
     {
         if ($this->entry instanceof Entry) return $this->entry;
 
-        $className = "\\fk\\pay\\entries\\{$this->channel}Entry";
+        $className = "\\fk\\pay\\entries\\{$this->platform}Entry";
         if (!class_exists($className)) throw new Exception("Cannot find entry of given entry: $className");
 
         $this->entry = new $className();
@@ -154,7 +138,7 @@ class Component
     {
         return $this->notifyPath ? rtrim($this->notifyPath, '/') . '/' . preg_replace_callback('/([A-Z])/', function ($word) {
                 return '-' . strtolower($word[1]);
-            }, lcfirst($this->getChannel())) . '.php'
+            }, lcfirst($this->getPlatform())) . '.php'
             : '';
     }
 
@@ -172,23 +156,23 @@ class Component
     }
 
     /**
-     * ```yii
-     * Yii::$app->pay->with('AliPay')->transfer();
      * ```
-     * @param $channel
+     * $pay->with('AliPay')->transfer();
+     * ```
+     * @param $platform
      * @return $this
      * @throws Exception
      */
-    public function with($channel)
+    public function with($platform)
     {
-        if ($channel && $this->platforms && $channel !== $this->channel) $this->platforms->with($channel);
+        if ($platform && $this->platforms && $platform !== $this->platform) $this->platforms->with($platform);
         return $this;
     }
 
     /**
      * e.g.
      * ```php
-     *  $component->with('WeChat')->app('web');
+     *  $pay->with('WeChat')->app('web');
      * ```
      * Means the platform is WeChat, and the configuration is read from `web`
      * @see Platform::app
@@ -235,13 +219,13 @@ class Component
      */
     public function transfer($orderSn, $id, $amount, $extra)
     {
-        $method = "transferWith{$this->channel}";
+        $method = "transferWith{$this->platform}";
 
         if (method_exists($this, $method)) {
             $this->platforms->loadConfigure();
             return $this->invoke($method, [$orderSn, $id, $amount, $extra]);
         } else {
-            throw new Exception('Channel not supported yet: ' . $this->channel);
+            throw new Exception('Channel not supported yet: ' . $this->platform);
         }
     }
 
@@ -278,11 +262,7 @@ class Component
 
     protected function error($message)
     {
-        // To be compatible with Yii2
-        // History issue, this is first designed for Yii2
-        if (defined('YII2_PATH')) {
-            \Yii::error($message);
-        }
+        throw new Exception($message);
     }
 
 }

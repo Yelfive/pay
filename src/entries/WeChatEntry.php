@@ -7,8 +7,8 @@
 
 namespace fk\pay\entries;
 
-use Exception;
 use fk\pay\Constant;
+use fk\pay\Exception;
 use fk\pay\lib\wechat\Config;
 use fk\pay\lib\wechat\JsApi;
 use fk\pay\lib\wechat\Pay;
@@ -35,29 +35,26 @@ class WeChatEntry extends Entry
      *      'time_start' => 1412345678, // optional
      *  ]
      * ```
-     * @return string
+     * @return array
      * @throws Exception
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
         $order = new UnifiedOrderData();
 
-        $order->SetBody($name);
-        if (is_array($description)) {
-            if (!isset($description['goods_id'])) throw new Exception('goods_id is required by field "detail"');
-            if (!isset($description['goods_name'])) throw new Exception('goods_name is required by field "detail"');
-            if (!isset($description['goods_num'])) throw new Exception('goods_num is required by field "detail"');
-            if (!isset($description['goods_price'])) throw new Exception('goods_price is required by field "detail"');
+        if (is_array($description) && $this->required($description, ['goods_id', 'goods_name', 'goods_num', 'goods_price'])) {
             $description = json_encode($description, JSON_UNESCAPED_UNICODE);
         }
+        $order->SetBody($name);
         $order->SetDetail($description);
         $order->SetOut_trade_no($orderSn);
         $order->SetTotal_fee(round($amount * 100));
 
-        if (!isset($extra['trade_type'])) throw new Exception('Miss required field: "trade_type"');
+        $this->required($extra, ['trade_type'], '"{attribute}" is required in `$extra`');
+
         $order->SetTrade_type($extra['trade_type']);
 
-        $order->SetNotify_url($this->notifyUrl);
+        $order->SetNotify_url($this->config['notifyUrl']);
         // Set extra params
         foreach ($extra as $k => &$v) {
             $method = 'Set' . ucfirst($k);
@@ -72,11 +69,11 @@ class WeChatEntry extends Entry
         }
 
         switch ($order->GetTrade_type()) {
-            case Constant::WX_TRADE_TYPE_JS:
+            case Constant::WECHAT_TRADE_TYPE_JS:
                 $model = new JsApi();
                 $data = $model->GetJsApiParameters($result);
                 break;
-            case Constant::WX_TRADE_TYPE_APP:
+            case Constant::WECHAT_TRADE_TYPE_APP:
                 $data = [
                     'appid' => Config::$APP_ID,
                     'partnerid' => Config::$MCH_ID,
@@ -100,4 +97,43 @@ class WeChatEntry extends Entry
         return $data;
     }
 
+    /**
+     * Enterprise transfer to an individual user
+     * @param $orderSn
+     * @param $id
+     * @param $amount
+     * @param $extra
+     * @return array
+     */
+    public function transfer($orderSn, $id, $amount, array $extra)
+    {
+        $transfer = new TransferData();
+        $transfer->setPartner_trade_no($orderSn)
+            ->setOpenid($id)
+            ->setAmount(round($amount * 100));
+        foreach ($extra as $k => &$v) {
+            if (TransferData::paramExists($k)) $transfer->{'set' . ucfirst($k)}($v);
+        }
+        return Pay::transfer($transfer);
+    }
+
+    public function checkSignature(array $data): bool
+    {
+        return true;
+    }
+
+    public function setConfig(array $config): EntryInterface
+    {
+        if (!$this->app) throw new Exception('`app` must be set before calling ' . __METHOD__);
+
+        $this->required($config, [$this->app], "Configure for app `$this->app` is required");
+
+        foreach ($this->config[$this->app] as $k => $v) {
+            $property = strtoupper($k);
+            if (property_exists(Config::class, $property)) {
+                Config::$$property = $v;
+            }
+        }
+        return $this;
+    }
 }
