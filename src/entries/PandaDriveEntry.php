@@ -7,6 +7,9 @@
 
 namespace fk\pay\entries;
 
+use fk\helpers\ArrayHelper;
+use GuzzleHttp\Client;
+
 class PandaDriveEntry extends Entry
 {
 
@@ -17,6 +20,32 @@ class PandaDriveEntry extends Entry
 
     public const FEE_TYPE_CNY = 1;
 
+    protected const RESULT_CODE_SUCCESS = 0;
+
+    public const TRADE_STATE_SUCCESS = 0;
+    public const TRADE_STATE_FAILURE = 1;
+    public const TRADE_STATE_PENDING = 3;
+
+    /**
+     * 0：退款成功。
+     */
+    public const REFUND_SUCCESS = 0;
+    /**
+     * 1：退款失败。
+     */
+    public const REFUND_FAILED = 1;
+    /**
+     * 3：退款处理中。
+     */
+    public const REFUND_PROCESSING = 3;
+    /**
+     * 4：未确定，需要商户原退款单号重新发起。
+     */
+    public const REFUND_UNCONFIRMED = 4;
+    /**
+     * 5：转入代发，退款到银行发现用户的卡作废或者冻结了，导致原路退款银行卡失败，资金回流到商户的现金帐号，需要商户人工干预，通过线下或者平台转账
+     */
+    public const REFUND_TRANSFER_MANUALLY = 5;
 
     /**
      * @param string $orderSn
@@ -70,8 +99,28 @@ class PandaDriveEntry extends Entry
         return $data;
     }
 
-    public function refund()
+    /**
+     * @param array $data
+     * @param callable $callback
+     * @return mixed|false False to indicates the failure
+     */
+    public function notify(array $data, callable $callback)
     {
+        if ($this->validate($data)) {
+            if (!isset($data['trade_state'])) return false;
+            if ($data['trade_state'] == self::TRADE_STATE_PENDING) return false;
+            return $callback($data);
+        } else {
+            return false;
+        }
+    }
+
+    protected function validate(array $data): bool
+    {
+        if (!$this->checkSignature($data)) return false;
+        if ($this->config['sh_name'] != $data['sh_name']) return false;
+        if ($data['retcode'] != self::RESULT_CODE_SUCCESS) return false;
+        return true;
     }
 
     public function checkSignature(array $data): bool
@@ -97,5 +146,43 @@ class PandaDriveEntry extends Entry
         }
 
         return $data['sign'] = md5("{$result}{$this->config['key']}");
+    }
+
+    /**
+     * @param string $orderSN
+     * @param string $orderSNOfThirdParty
+     * @param string $refundSN
+     * @param int $uid
+     * @param float $totalAmount
+     * @param null $refundAmount default `$totalAmount`
+     * @return array|false
+     */
+    public function refund($orderSN, $orderSNOfThirdParty, $refundSN, $uid, $totalAmount, $refundAmount = null)
+    {
+        $requiredConfig = ['sh_name', 'subpartner'];
+        $this->required($this->config, $requiredConfig);
+        $data = ArrayHelper::only($this->config, $requiredConfig)
+            + [
+                'resource' => self::RESOURCE_PANDA_BANK,
+                'out_trade_no' => $orderSN,
+                'transaction_id' => $orderSNOfThirdParty,
+                'out_refund_no' => $refundSN,
+                'refund_fee' => $refundAmount ?? $totalAmount,
+                'userid' => $uid,
+                'refund_reason' => '',
+                'total_fee' => $totalAmount,
+            ];
+        $this->sign($data);
+        $client = new Client();
+        $res = $client->request('POST', "{$this->config['host']}/refund.php", [
+            'form_params' => $data
+        ]);
+        $body = $res->getBody()->getContents();
+        $result = json_decode($body, true);
+        if ($this->validate($result)) {
+            return $result;
+        } else {
+            return false;
+        }
     }
 }

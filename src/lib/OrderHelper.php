@@ -9,7 +9,8 @@ namespace fk\pay\lib;
 
 class OrderHelper
 {
-    const CATEGORY_DEFAULT = 10;
+    public const CATEGORY_DEFAULT = 10;
+    public const CATEGORY_REFUND = 11;
 
     public static function generateSN($pk = null, $category = 10): string
     {
@@ -30,7 +31,7 @@ class OrderHelper
         /*
          * category, pk, timestamp, random number
          * $pk.length = 12
-         * $ts.length = 14
+         * $ts.length = 13
          * $rand.length = 4
          * $category.length = 2
          */

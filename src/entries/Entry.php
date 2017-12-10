@@ -44,7 +44,7 @@ abstract class Entry implements EntryInterface
     {
         if ($message === null) $message = '"{attribute}" is required';
         foreach ($attributes as $name) {
-            if (!empty($data[$name])) throw new Exception(str_replace('{attribute}', $name, $message));
+            if (empty($data[$name])) throw new Exception(str_replace('{attribute}', $name, $message));
         }
         return true;
     }

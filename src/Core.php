@@ -87,7 +87,7 @@ class Core
     protected function loadEntry()
     {
         $platform = $this->config->with();
-        $entryClass = "\\fk\pay\\entries\\$platform";
+        $entryClass = "\\fk\pay\\entries\\{$platform}Entry";
         if (!class_exists($entryClass)) {
             throw new Exception("Platform $platform not supported");
         }
