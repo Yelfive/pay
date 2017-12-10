@@ -23,8 +23,8 @@ class OrderHelper
         $ts = sprintf('%13d', microtime(true) * 1000);
         $rand = mt_rand(100, 999);
         if (!is_int($category)) $category = intval($category);
-        if (!$category || $category < 100) {
-            $category = 100;
+        if (!$category || $category < 1) {
+            $category = 1;
         } else if ($category > 999) {
             $category = 999;
         }
@@ -33,7 +33,7 @@ class OrderHelper
          * $pk.length = 12
          * $ts.length = 13
          * $rand.length = 4
-         * $category.length = 2
+         * $category.length = 3
          */
         $SN = "$category$pk$ts$rand";
         return $SN;
