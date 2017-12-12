@@ -7,6 +7,7 @@
 
 namespace fk\pay\config;
 
+use fk\helpers\ArrayHelper;
 use fk\pay\Exception;
 
 class Container
@@ -39,13 +40,16 @@ class Container
 
     }
 
-    public function get()
+    public function get($name = null)
     {
         if (!$this->with) throw new Exception('Platform not specified');
 
         if (empty($this->config[$this->with])) throw new Exception("Config not specified for platform: {$this->with}");
 
-        return $this->config[$this->with];
+        $config = $this->config[$this->with];
+        if (!is_string($name)) return $config;
+
+        return ArrayHelper::get($config, $name);
     }
 
     /**

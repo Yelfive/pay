@@ -99,4 +99,9 @@ class Core
         return $entry;
     }
 
+    public function config()
+    {
+        return $this->config;
+    }
+
 }

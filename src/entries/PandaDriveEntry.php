@@ -62,7 +62,7 @@ class PandaDriveEntry extends Entry
 
     protected function insideWeChat()
     {
-        return strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== -1;
+        return strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false;
     }
 
     protected function payInsideWeChat(string $orderSn, float $amount, string $name, string $description, array $extra = [])
@@ -71,8 +71,8 @@ class PandaDriveEntry extends Entry
 
     protected function payWithH5(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
-        $this->required($this->config, ['sh_name', 'key', 'subpartner', 'notify_url', 'return_url']);
-        $this->required($extra, ['uid', 'show_url', 'channel']);
+        $this->required($this->config, ['sh_name', 'key', 'subpartner', 'notify_url']);
+        $this->required($extra, ['uid', 'show_url', 'channel', 'return_url']);
         $data = [
             'sh_name' => $this->config['sh_name'],
             'subpartner' => $this->config['subpartner'],
@@ -90,7 +90,7 @@ class PandaDriveEntry extends Entry
             'fee_type' => self::FEE_TYPE_CNY,
             'spbill_create_ip' => $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'],
             'notify_url' => $this->notifyUrl,
-            'return_url' => $this->returnUrl,
+            'return_url' => $extra['return_url'],
             // @see self::CHANNEL_*
             'trans_channel' => $extra['channel'],
         ];
