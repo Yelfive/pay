@@ -73,6 +73,7 @@ class PandaDriveEntry extends Entry
     {
         $this->required($this->config, ['sh_name', 'key', 'subpartner', 'notify_url']);
         $this->required($extra, ['uid', 'show_url', 'channel', 'return_url']);
+
         $data = [
             'sh_name' => $this->config['sh_name'],
             'subpartner' => $this->config['subpartner'],
@@ -96,7 +97,18 @@ class PandaDriveEntry extends Entry
         ];
 
         $this->sign($data);
-        return $data;
+        return $this->post('payByH5', $data);
+    }
+
+    protected function post($api, $data)
+    {
+        $client = new Client();
+        $uri = "{$this->config['host']}/$api.php";
+
+        $result = $client->request('POST', $uri, [
+            'form_params' => $data
+        ]);
+        return $result->getBody()->getContents();
     }
 
     /**
