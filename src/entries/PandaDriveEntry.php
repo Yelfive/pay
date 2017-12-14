@@ -78,7 +78,7 @@ class PandaDriveEntry extends Entry
             'sh_name' => $this->config['sh_name'],
             'subpartner' => $this->config['subpartner'],
             // User of your platform
-            'userid ' => $extra['uid'],
+            'userid' => $extra['uid'],
             'resource' => self::RESOURCE_PANDA_BANK,
 
             // business parameters
@@ -153,9 +153,10 @@ class PandaDriveEntry extends Entry
 
         $result = '';
         foreach ($data as $k => $v) {
-            if (empty($v)) continue;
-            $result .= "$k=$v";
+            if (strlen($v) === 0) continue;
+            $result .= "$k=$v&";
         }
+        $result = rtrim($result, '&');
 
         return $data['sign'] = md5("{$result}{$this->config['key']}");
     }
