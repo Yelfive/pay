@@ -12,15 +12,33 @@ class OrderHelper
     public const CATEGORY_DEFAULT = 10;
     public const CATEGORY_REFUND = 11;
 
+    protected static function randomIP()
+    {
+        return implode('.', array_map(function () {
+            return rand(1, 255);
+        }, array_fill(0, 4, 0)));
+    }
+
+    /**
+     * A Serial Number is made of four parts:
+     *
+     * **$category + $timestamp + $random + $pk**
+     *
+     * - $category.length = 2~3
+     * - $ts.length = 12
+     * - $pk.length = 1~11, preceding 0 means ip address
+     * - $rand.length = 3
+     * @param null|int $pk
+     * @param int $category
+     * @return string
+     */
     public static function generateSN($pk = null, $category = 10): string
     {
-        if (is_numeric($pk)) {
-            $pk = sprintf('%012d', $pk);
-        } else {
-            $ip = $_SERVER['HTTP_X_REAL_IP'] ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
-            $pk = sprintf('%03d%03d%03d%03d', ...explode('.', $ip));
+        if (!$pk || !is_numeric($pk)) {
+            $ip = $_SERVER['HTTP_X_REAL_IP'] ?? ($_SERVER['REMOTE_ADDR'] ?? static::randomIP());
+            $pk = '0' . intval(sprintf(str_repeat('%08b', 4), ...explode('.', $ip)), 2);
         }
-        $ts = sprintf('%13d', microtime(true) * 1000);
+        $ts = sprintf('%12d', microtime(true) * 100);
         $rand = mt_rand(100, 999);
         if (!is_int($category)) $category = intval($category);
         if (!$category || $category < 1) {
@@ -28,14 +46,7 @@ class OrderHelper
         } else if ($category > 999) {
             $category = 999;
         }
-        /*
-         * category, pk, timestamp, random number
-         * $pk.length = 12
-         * $ts.length = 13
-         * $rand.length = 4
-         * $category.length = 3
-         */
-        $SN = "$category$pk$ts$rand";
-        return $SN;
+        $sn = "$category$ts$rand$pk";
+        return $sn;
     }
 }

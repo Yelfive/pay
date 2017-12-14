@@ -72,13 +72,13 @@ class PandaDriveEntry extends Entry
     protected function payWithH5(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
         $this->required($this->config, ['sh_name', 'key', 'subpartner', 'notify_url']);
-        $this->required($extra, ['uid', 'show_url', 'channel', 'return_url']);
+        $this->required($extra, ['show_url', 'channel', 'return_url']);
 
         $data = [
             'sh_name' => $this->config['sh_name'],
             'subpartner' => $this->config['subpartner'],
             // User of your platform
-            'userid' => $extra['uid'],
+            'userid' => $extra['uid'] ?? 0,
             'resource' => self::RESOURCE_PANDA_BANK,
 
             // business parameters
