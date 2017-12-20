@@ -137,7 +137,8 @@ class PandaDriveEntry extends Entry
 
     public function checkSignature(array $data): bool
     {
-        $sign = $data['sign'];
+        $sign = $data['sign'] ?? '';
+        if (!$sign) return false;
         unset($data['sign']);
         return $sign === $this->sign($data);
     }
