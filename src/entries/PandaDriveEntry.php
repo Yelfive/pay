@@ -26,6 +26,8 @@ class PandaDriveEntry extends Entry
     public const TRADE_STATE_FAILURE = 1;
     public const TRADE_STATE_PENDING = 3;
 
+    public $response;
+
     /**
      * 0：退款成功。
      */
@@ -168,10 +170,11 @@ class PandaDriveEntry extends Entry
      * @param string $refundSN
      * @param int $uid
      * @param float $totalAmount
-     * @param null $refundAmount default `$totalAmount`
+     * @param null|float $refundAmount default `$totalAmount`
+     * @param string $reason
      * @return array|false
      */
-    public function refund($orderSN, $orderSNOfThirdParty, $refundSN, $uid, $totalAmount, $refundAmount = null)
+    public function refund($orderSN, $orderSNOfThirdParty, $refundSN, $uid, $totalAmount, $refundAmount = null, $reason)
     {
         $requiredConfig = ['sh_name', 'subpartner'];
         $this->required($this->config, $requiredConfig);
@@ -183,16 +186,12 @@ class PandaDriveEntry extends Entry
                 'out_refund_no' => $refundSN,
                 'refund_fee' => $refundAmount ?? $totalAmount,
                 'userid' => $uid,
-                'refund_reason' => '',
+                'refund_reason' => $reason,
                 'total_fee' => $totalAmount,
             ];
         $this->sign($data);
-        $client = new Client();
-        $res = $client->request('POST', "{$this->config['host']}/refund.php", [
-            'form_params' => $data
-        ]);
-        $body = $res->getBody()->getContents();
-        $result = json_decode($body, true);
+        $body = $this->post('refund', $data);
+        $this->response = $result = json_decode($body, true);
         if ($this->validate($result)) {
             return $result;
         } else {
