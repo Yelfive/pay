@@ -198,4 +198,10 @@ class PandaDriveEntry extends Entry
             return false;
         }
     }
+
+    public function subpartner($id)
+    {
+        $this->config['subpartner'] = $id;
+        return $this;
+    }
 }
