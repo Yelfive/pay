@@ -133,7 +133,7 @@ class PandaDriveEntry extends Entry
     {
         if (!$this->checkSignature($data)) return false;
         if (!isset($data['sh_name']) || $this->config['sh_name'] != $data['sh_name']) return false;
-        if (!isset($data['retcode']) && $data['retcode'] != self::RESULT_CODE_SUCCESS) return false;
+        if (!isset($data['retcode']) || $data['retcode'] != self::RESULT_CODE_SUCCESS) return false;
         return true;
     }
 
