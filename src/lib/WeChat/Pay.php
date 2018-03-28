@@ -1,6 +1,6 @@
 <?php
 
-namespace fk\pay\lib\wechat;
+namespace fk\pay\lib\WeChat;
 /**
  *
  * 接口访问类，包含所有微信支付API列表的封装，类中方法为static方法，

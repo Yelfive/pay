@@ -1,14 +1,14 @@
 {
-  "name": "fk/pay",
-  "licence": "MIT",
-  "type": "library",
-  "require": {
-    "php": ">=5.4",
-    "fk/fluent": "*"
-  },
-  "autoload": {
-    "psr-4": {
-      "fk\\pay\\": "./src"
+    "name": "fk/pay",
+    "licence": "MIT",
+    "type": "library",
+    "require": {
+        "php": ">=5.4",
+        "fk/helpers-fluent": "^0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "fk\\pay\\": "./src"
+        }
     }
-  }
 }

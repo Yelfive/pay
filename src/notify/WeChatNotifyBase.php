@@ -6,7 +6,7 @@
 
 namespace fk\pay\notify;
 
-use fk\pay\lib\wechat\Notify;
+use fk\pay\lib\WeChat\Notify;
 
 class WeChatNotifyBase extends Notify
 {

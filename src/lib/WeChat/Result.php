@@ -4,7 +4,7 @@
  * @author Felix Huang <yelfivehuang@gmail.com>
  */
 
-namespace fk\pay\lib\wechat;
+namespace fk\pay\lib\WeChat;
 
 /**
  *

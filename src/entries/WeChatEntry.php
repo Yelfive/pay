@@ -9,12 +9,12 @@ namespace fk\pay\entries;
 
 use fk\pay\Constant;
 use fk\pay\Exception;
-use fk\pay\lib\wechat\Config;
-use fk\pay\lib\wechat\JsApi;
-use fk\pay\lib\wechat\Pay;
-use fk\pay\lib\wechat\Result;
-use fk\pay\lib\wechat\TransferData;
-use fk\pay\lib\wechat\UnifiedOrderData;
+use fk\pay\lib\WeChat\Config;
+use fk\pay\lib\WeChat\JsApi;
+use fk\pay\lib\WeChat\Pay;
+use fk\pay\lib\WeChat\Result;
+use fk\pay\lib\WeChat\TransferData;
+use fk\pay\lib\WeChat\UnifiedOrderData;
 
 class WeChatEntry extends Entry
 {
@@ -37,7 +37,7 @@ class WeChatEntry extends Entry
      * ```
      * @return array
      * @throws Exception
-     * @throws \fk\pay\lib\wechat\Exception
+     * @throws \fk\pay\lib\WeChat\Exception
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
@@ -55,7 +55,7 @@ class WeChatEntry extends Entry
 
         $order->SetTrade_type($extra['trade_type']);
 
-        $order->SetNotify_url($this->config['notifyUrl']);
+        $order->SetNotify_url($this->config->getWorkingConfig('notify_url'));
         // Set extra params
         foreach ($extra as $k => &$v) {
             $method = 'Set' . ucfirst($k);
@@ -105,7 +105,7 @@ class WeChatEntry extends Entry
      * @param float $amount
      * @param array $extra
      * @return array
-     * @throws \fk\pay\lib\wechat\Exception
+     * @throws \fk\pay\lib\WeChat\Exception
      */
     public function transfer($orderSn, $id, $amount, array $extra)
     {

@@ -1,6 +1,6 @@
 <?php
 
-namespace fk\pay\lib\wechat;
+namespace fk\pay\lib\WeChat;
 
 /**
  *
