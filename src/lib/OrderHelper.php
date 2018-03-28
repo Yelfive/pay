@@ -32,7 +32,7 @@ class OrderHelper
      * @param int $category
      * @return string
      */
-    public static function generateSN($pk = null, $category = 10): string
+    public static function generateSN($pk = null, $category = self::CATEGORY_DEFAULT): string
     {
         if (!$pk || !is_numeric($pk)) {
             $ip = $_SERVER['HTTP_X_REAL_IP'] ?? ($_SERVER['REMOTE_ADDR'] ?? static::randomIP());

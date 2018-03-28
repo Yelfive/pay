@@ -9,13 +9,6 @@ namespace fk\pay\entries;
 
 interface EntryInterface
 {
-
-    public function setConfig(array $config): EntryInterface;
-
-    public function setNotifyUrl(string $url): EntryInterface;
-
-    public function setReturnUrl(string $url): EntryInterface;
-
     /**
      * @param string $orderSn
      * @param float $amount
@@ -26,5 +19,5 @@ interface EntryInterface
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = []);
 
-    public function checkSignature(array $data):bool;
+    public function checkSignature(array $data): bool;
 }

@@ -1,78 +1,63 @@
-FK Pay
-======
-Integration of all Third Part Payment(TPP)
+# FK Pay V3
 
-Configuration
--------------
+The v2.0 will not be maintained.
+
+Integration of Third Part Payments(TPP)
+
+## Configuration
 
 ```php
-# main-local.php
 <?php
 return [
-    // other config
-    'components' => [
-        'pay' => [
-            'class' => 'fk\pay\Component',
-            'defaultPlatform' => 'WeChat', // Here is default channel
-            // As for different platforms, the actual notify_url will need a prefix of platform name
-            // end with .php
-            // e.g.
-            // For WeChat, it will be `https://api.alijian.net/notify/we-chat.php`
-            // The `we-chat.php` come from `WeChat`.
-            // You should rewrite the server route, to fit the filename rule.
-            'notifyPath' => 'https://api-test.alijian.net/notify/',
-            'platforms' => [
-                'WeChat' => [
-                    'web' => [ // Web, a.k.a JS, a.k.a H5 payment
-                        'app_id' => 'wx71xxx',
-                        'app_secret' => 'xxx',
-                        'mch_id' => 1234567890,
-                        'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
-                        'ssl_cert_path' => '@common/data/cache/apiclient_cert.pem', // to refund
-                        'ssl_key_path' => '@common/data/cache/apiclient_key.pem',
-                    ],
-                    'app' => [ // App(iOS, Android) payment
-                        'app_id' => 'wxxxxx',
-                        'mch_id' => 1234567890,
-                        'app_secret' => '6exxx',
-                        'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
-                        'ssl_cert_path' => '@common/data/cache/apiclient_cert.pem', // to refund
-                        'ssl_key_path' => '@common/data/cache/apiclient_key.pem',
-                    ]
-                ],
-                'AliPay' => [ // under construction
-                    'name' => 'haha',
-                ],
-            ]
+    'WeChat' => [
+        'web' => [ // Web, a.k.a JS, a.k.a H5 payment
+            'app_id' => 'wx71xxx',
+            'app_secret' => 'xxx',
+            'mch_id' => 1234567890,
+            'key' => 'QqDAWHMgDpskKmsdjYH', // to sign
+            'ssl_cert_path' => 'path/to/apiclient_cert.pem', // To use enterprise paying to individual's balance
+            'ssl_key_path' => '@common/data/cache/apiclient_key.pem',
+        ],
+        'app' => [
+            // ... same as above
         ]
-    ]
+    ],
+    'AliPay' => [ // under construction
+        'h5' => [
+            
+        ]
+    ],
 ];
 
 ```
-Pay
----
-Transfer money from user's TPP account to your platform
+## APIs
+
+### Pay
+
+To create an order and get the redirect params for actual payment
+
 ```php
 <?php
+
 $orderSn = '2014124582620133'; // 20 bytes recommended
 $amount = 1000; // Money with unit Fen(CNY), 10 Yuan
 $name = 'Apple';
 $description = 'Sweet Apple';
 $extra = [
     'trade_type' => 'JSAPI',
-    'openid' => 'o-28js7h4kd01kldfg7ag29zk3'
+    'openid' => 'o-28js7h4kd08js7h4kd08js7h4kd0'
 ];
-Yii::$app->pay
-    ->with('WeChat') // Default defined in config file
-    ->pay($orderSn, $amount, $name, $description, $extra);
+$pay = new \fk\pay\PayUniform($config); // refer to the previous part for $config
+$pay->useWeChat()->pay($orderSn, $amount, $name, $description, $extra);
 ```
-| Parameter | Description|
-|---|---|
-|$orderSn   | Order Serial Number on your platform|
-|$amount    | Money of the goods|
-|$name      | Name of the goods|
-|$description| Description for the goods|
-|$extra     | Extra information for the order, differs with TPP|
+
+| Parameter | Description
+|---        | ---        
+|$orderSn   | Order Serial Number on your platform
+|$amount    | Money of the goods
+|$name      | Name of the goods
+|$description| Description for the goods
+|$extra     | Extra information for the order, differs with TPP
 
 ### $extra for Wechat
 - **trade_type**: required APP, JSAPI, NATIVE

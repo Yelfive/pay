@@ -37,6 +37,7 @@ class WeChatEntry extends Entry
      * ```
      * @return array
      * @throws Exception
+     * @throws \fk\pay\lib\wechat\Exception
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
@@ -99,11 +100,12 @@ class WeChatEntry extends Entry
 
     /**
      * Enterprise transfer to an individual user
-     * @param $orderSn
-     * @param $id
-     * @param $amount
-     * @param $extra
+     * @param string $orderSn
+     * @param string $id Third party id
+     * @param float $amount
+     * @param array $extra
      * @return array
+     * @throws \fk\pay\lib\wechat\Exception
      */
     public function transfer($orderSn, $id, $amount, array $extra)
     {
@@ -122,18 +124,16 @@ class WeChatEntry extends Entry
         return true;
     }
 
-    public function setConfig(array $config): EntryInterface
+    /**
+     * @throws Exception
+     */
+    protected function setConfig()
     {
-        if (!$this->app) throw new Exception('`app` must be set before calling ' . __METHOD__);
-
-        $this->required($config, [$this->app], "Configure for app `$this->app` is required");
-
-        foreach ($this->config[$this->app] as $k => $v) {
+        foreach ($this->config->getWorkingConfig() as $k => $v) {
             $property = strtoupper($k);
             if (property_exists(Config::class, $property)) {
                 Config::$$property = $v;
             }
         }
-        return $this;
     }
 }

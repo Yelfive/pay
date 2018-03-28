@@ -9,6 +9,7 @@ namespace fk\pay\entries;
 
 use fk\pay\lib\alipay\wap\service\AliPayTradeService;
 use fk\pay\lib\alipay\wap\builders\AliPayTradeWapPayContentBuilder;
+use fk\pay\PlatformsConfig;
 
 class AliPayEntry extends Entry
 {
@@ -33,7 +34,7 @@ class AliPayEntry extends Entry
     const NOTIFY_RESULT_SUCCESS = 'success';
     const NOTIFY_RESULT_FAILED = 'failed';
 
-    public function __construct()
+    protected function setConfig()
     {
         defined('AOP_SDK_WORK_DIR') or define('AOP_SDK_WORK_DIR', $this->config['logPath'] ?? dirname(__DIR__) . '/lib/alipay');
     }
@@ -46,6 +47,16 @@ class AliPayEntry extends Entry
         ];
     }
 
+    /**
+     * @param string $orderSn
+     * @param float $amount
+     * @param string $name
+     * @param string $description
+     * @param array $extra
+     * @return mixed
+     * @throws \Exception
+     * @throws \fk\pay\Exception
+     */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
         $builder = new AliPayTradeWapPayContentBuilder();
@@ -55,8 +66,8 @@ class AliPayEntry extends Entry
         $builder->setSubject($name);
         $builder->setTimeExpress($extra['time_express'] ?? '1d');
 
-        $response = new AliPayTradeService($this->config);
-        $result = $response->wapPay($builder, $this->returnUrl, $this->notifyUrl);
+        $response = new AliPayTradeService($this->config->getWorkingConfig());
+        $result = $response->wapPay($builder, $this->config->getWorkingConfig('return_url'), $this->config->getWorkingConfig('notify_url'));
 
         return $result;
     }
@@ -64,6 +75,7 @@ class AliPayEntry extends Entry
     /**
      * @param array $data
      * @return bool
+     * @throws \Exception
      */
     public function checkSignature(array $data): bool
     {
