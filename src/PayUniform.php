@@ -112,5 +112,4 @@ class PayUniform
     {
         return $this->platforms->getWorkingConfig($dotKey);
     }
-
 }

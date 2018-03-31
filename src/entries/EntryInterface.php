@@ -20,4 +20,11 @@ interface EntryInterface
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = []);
 
     public function checkSignature(array $data): bool;
+
+    /**
+     * Async notify
+     * @param callable $callback
+     * @return boolean Whether notify success handled
+     */
+    public function notify(callable $callback): bool;
 }

@@ -15,8 +15,8 @@ class WeChatNotifyBase extends Notify
 
     public function NotifyProcess($data, &$msg)
     {
-        $method= $this->process;
-        return $method($data, $msg);
+        $result = new WeChatNotifyResult($data);
+        return call_user_func($this->process, $result, $msg);
     }
 
 }

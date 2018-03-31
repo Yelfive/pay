@@ -8,6 +8,7 @@
 namespace fk\pay\entries;
 
 use fk\pay\Exception;
+use fk\pay\notify\NotifyInterface;
 use fk\pay\PlatformsConfig;
 
 abstract class Entry implements EntryInterface
@@ -41,4 +42,17 @@ abstract class Entry implements EntryInterface
         return true;
     }
 
+    public function notify(callable $callback): bool
+    {
+        $rpos = strrpos(static::class, '\\');
+        $start = $rpos === false ? 0 : $rpos + 1;
+        $basename = str_replace('Entry', 'Notify', substr(static::class, $start));
+        $className = '\fk\pay\notify\\' . $basename;
+        $notify = new $className;
+
+        if ($notify instanceof NotifyInterface) {
+            return $notify::handle($callback);
+        }
+        throw new Exception('Notify class should be instance of ' . NotifyInterface::class);
+    }
 }
