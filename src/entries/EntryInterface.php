@@ -24,7 +24,7 @@ interface EntryInterface
     /**
      * Async notify
      * @param callable $callback
-     * @return boolean Whether notify success handled
+     * @return mixed result of notify, success or error, differs from different platform
      */
-    public function notify(callable $callback): bool;
+    public function notify(callable $callback);
 }

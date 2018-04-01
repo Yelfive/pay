@@ -42,7 +42,7 @@ abstract class Entry implements EntryInterface
         return true;
     }
 
-    public function notify(callable $callback): bool
+    public function notify(callable $callback)
     {
         $rpos = strrpos(static::class, '\\');
         $start = $rpos === false ? 0 : $rpos + 1;
