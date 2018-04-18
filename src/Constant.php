@@ -13,6 +13,7 @@ class Constant
     public const WECHAT_TRADE_TYPE_JS = 'JSAPI';
     public const WECHAT_TRADE_TYPE_NATIVE = 'NATIVE';
     public const WECHAT_TRADE_TYPE_APP = 'APP';
+    public const WECHAT_TRADE_TYPE_H5 = 'MWEB';
 
     public const PLATFORM_WECHAT = 'WeChat';
     public const PLATFORM_ALIPAY = 'AliPay';

@@ -91,6 +91,11 @@ class WeChatEntry extends Entry
                 $data['packageValue'] = $data['package'];
                 unset($data['package']);
                 break;
+            case Constant::WECHAT_TRADE_TYPE_H5:
+                $data = [
+                    'location' => $result['mweb_url']
+                ];
+                break;
             default:
                 $data = [];
         }
