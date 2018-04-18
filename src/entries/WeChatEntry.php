@@ -92,8 +92,10 @@ class WeChatEntry extends Entry
                 unset($data['package']);
                 break;
             case Constant::WECHAT_TRADE_TYPE_H5:
+                $location = $result['mweb_url'];
+                if (!empty($extra['redirect_url'])) $location .= (strpos($location, '?') ? '&' : '?') . 'redirect_url=' . urlencode($extra['redirect_url']);
                 $data = [
-                    'location' => $result['mweb_url']
+                    'location' => $location
                 ];
                 break;
             default:
