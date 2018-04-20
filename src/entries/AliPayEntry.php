@@ -9,7 +9,6 @@ namespace fk\pay\entries;
 
 use fk\pay\lib\alipay\wap\service\AliPayTradeService;
 use fk\pay\lib\alipay\wap\builders\AliPayTradeWapPayContentBuilder;
-use fk\pay\PlatformsConfig;
 
 class AliPayEntry extends Entry
 {
@@ -67,7 +66,7 @@ class AliPayEntry extends Entry
         $builder->setTimeExpress($extra['time_express'] ?? '1d');
 
         $response = new AliPayTradeService($this->config->getWorkingConfig());
-        $result = $response->wapPay($builder, $this->config->getWorkingConfig('return_url'), $this->config->getWorkingConfig('notify_url'));
+        $result = $response->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
 
         return $result;
     }

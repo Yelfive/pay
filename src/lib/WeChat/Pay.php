@@ -46,7 +46,7 @@ class Pay
 
         $inputObj->IsAppidSet() || $inputObj->SetAppid(Config::$APP_ID);//公众账号ID
         $inputObj->IsMch_idSet() || $inputObj->SetMch_id(Config::$MCH_ID);//商户号
-        $inputObj->SetSpbill_create_ip($_SERVER['REMOTE_ADDR']);//终端ip
+        $inputObj->SetSpbill_create_ip($_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR']);//终端ip
         //$inputObj->SetSpbill_create_ip("1.1.1.1");
         $inputObj->SetNonce_str(self::getNonceStr());//随机字符串
 
