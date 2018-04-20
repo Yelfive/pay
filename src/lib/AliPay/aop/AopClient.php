@@ -327,14 +327,14 @@ class AopClient
 
     /**
      * 建立请求，以表单HTML形式构造（默认）
-     * @param $para_temp 请求参数数组
-     * @return 提交表单HTML文本
+     * @param array $para_temp 请求参数数组
+     * @return string 提交表单HTML文本
      */
     protected function buildRequestForm($para_temp)
     {
 
         $sHtml = "<form id='alipaysubmit' name='alipaysubmit' action='" . $this->gatewayUrl . "?charset=" . trim($this->postCharset) . "' method='POST'>";
-        while (list ($key, $val) = each($para_temp)) {
+        foreach ($para_temp as [$key, $val]) {
             if (false === $this->checkEmpty($val)) {
                 //$val = $this->characet($val, $this->postCharset);
                 $val = str_replace("'", "&apos;", $val);
@@ -351,6 +351,13 @@ class AopClient
         return $sHtml;
     }
 
+    /**
+     * @param AliPayTradeWapPayRequest $request
+     * @param null $authToken
+     * @param null $appInfoAuthtoken
+     * @return bool|mixed|\SimpleXMLElement
+     * @throws Exception
+     */
     public function execute($request, $authToken = null, $appInfoAuthtoken = null)
     {
         $this->setupCharsets($request);
@@ -383,6 +390,7 @@ class AopClient
         $sysParams["notify_url"] = $request->getNotifyUrl();
         $sysParams["charset"] = $this->postCharset;
         $sysParams["app_auth_token"] = $appInfoAuthtoken;
+        $sysParams['return_url'] = $request->getReturnUrl();
 
         //获取业务参数
         $apiParams = $request->getApiParas();
@@ -581,9 +589,9 @@ class AopClient
         //调用openssl内置方法验签，返回bool值
 
         if ("RSA2" == $signType) {
-            $result = (bool)openssl_verify($data, base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
+            $result = 1 === openssl_verify($data, base64_decode($sign), $res, OPENSSL_ALGO_SHA256);
         } else {
-            $result = (bool)openssl_verify($data, base64_decode($sign), $res);
+            $result = 1 === openssl_verify($data, base64_decode($sign), $res);
         }
 
         if (!$this->checkEmpty($this->alipayPublicKey)) {

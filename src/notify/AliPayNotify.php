@@ -24,7 +24,6 @@ class AliPayNotify implements NotifyInterface
     public static function handle(callable $callback, PlatformsConfig $config)
     {
         $service = new AliPayTradeService($config->getWorkingConfig());
-        $service->writeLog(var_export($_POST, true));
         if (!$service->check($_POST)) return 'fail';
 
         if (call_user_func($callback, new AliPayNotifyResult($_POST))) {
@@ -32,8 +31,6 @@ class AliPayNotify implements NotifyInterface
         } else {
             return 'fail';
         }
-
-
     }
 }
 

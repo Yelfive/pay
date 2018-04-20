@@ -95,7 +95,7 @@ class WeChatEntry extends Entry
                 $location = $result['mweb_url'];
                 if (!empty($extra['redirect_url'])) $location .= (strpos($location, '?') ? '&' : '?') . 'redirect_url=' . urlencode($extra['redirect_url']);
                 $data = [
-                    'location' => $location
+                    'redirect' => $location
                 ];
                 break;
             default:

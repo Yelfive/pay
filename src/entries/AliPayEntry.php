@@ -66,8 +66,8 @@ class AliPayEntry extends Entry
         $builder->setSubject($name);
         $builder->setTimeExpress($extra['time_express'] ?? '1d');
 
-        $response = new AliPayTradeService($this->config->getWorkingConfig());
-        $result = $response->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
+        $service = new AliPayTradeService($this->config->getWorkingConfig());
+        $result = $service->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
 
         return $result;
     }
@@ -79,7 +79,7 @@ class AliPayEntry extends Entry
      */
     public function checkSignature(array $data): bool
     {
-        $valid = (new AliPayTradeService($this->config))->check($data);
+        $valid = (new AliPayTradeService($this->config->getWorkingConfig()))->check($data);
         return is_bool($valid) ? $valid : false;
     }
 }

@@ -51,7 +51,7 @@ abstract class Entry implements EntryInterface
         $notify = new $className;
 
         if ($notify instanceof NotifyInterface) {
-            return $notify::handle($callback);
+            return $notify::handle($callback, $this->config);
         }
         throw new Exception('Notify class should be instance of ' . NotifyInterface::class);
     }
