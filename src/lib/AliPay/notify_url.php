@@ -14,7 +14,7 @@
 use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
 
 require_once("config.php");
-require_once 'wappay/service/AlipayTradeService.php';
+require_once 'wap/service/AlipayTradeService.php';
 
 
 $arr = $_POST;

@@ -7,8 +7,8 @@
 
 namespace fk\pay\entries;
 
-use fk\pay\lib\alipay\wap\service\AliPayTradeService;
-use fk\pay\lib\alipay\wap\builders\AliPayTradeWapPayContentBuilder;
+use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
+use fk\pay\lib\AliPay\wap\builders\AliPayTradeWapPayContentBuilder;
 
 class AliPayEntry extends Entry
 {
@@ -58,6 +58,7 @@ class AliPayEntry extends Entry
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
+        $this->required($extra, ['return_url']);
         $builder = new AliPayTradeWapPayContentBuilder();
         $builder->setOutTradeNo($orderSn);
         $builder->setTotalAmount($amount);
