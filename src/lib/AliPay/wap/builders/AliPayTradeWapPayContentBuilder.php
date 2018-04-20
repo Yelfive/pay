@@ -12,7 +12,7 @@
  * Maintained by Felix Huang <yelfivehuang@gmail.com>
  */
 
-namespace fk\pay\lib\alipay\wap\builders;
+namespace fk\pay\lib\AliPay\wap\builders;
 
 class AliPayTradeWapPayContentBuilder implements BuilderInterface
 {

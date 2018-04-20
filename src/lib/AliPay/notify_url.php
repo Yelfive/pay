@@ -11,7 +11,7 @@
  * 该页面不能在本机电脑测试，请到服务器上做测试。请确保外部可以访问该页面。
  * 如果没有收到该页面返回的 success 信息，支付宝会在24小时内按一定的时间策略重发通知
  */
-use fk\pay\lib\alipay\wap\service\AliPayTradeService;
+use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
 
 require_once("config.php");
 require_once 'wappay/service/AlipayTradeService.php';

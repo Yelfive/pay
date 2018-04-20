@@ -1,12 +1,12 @@
 <?php
 
-namespace fk\pay\lib\alipay\aop;
+namespace fk\pay\lib\AliPay\aop;
 
 //require_once 'AopEncrypt.php';
 
 use Exception;
-use fk\pay\lib\alipay\aop\request\AliPayTradeWapPayRequest;
-use fk\pay\lib\alipay\lotusphp_runtime\Logger\LtLogger;
+use fk\pay\lib\AliPay\aop\request\AliPayTradeWapPayRequest;
+use fk\pay\lib\AliPay\lotusphp_runtime\Logger\LtLogger;
 
 class AopClient
 {

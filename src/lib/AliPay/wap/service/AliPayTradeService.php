@@ -11,12 +11,12 @@
 //require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . './../../AopSdk.php';
 //require dirname(__FILE__) . DIRECTORY_SEPARATOR . './../../config.php';
 
-namespace fk\pay\lib\alipay\wap\service;
+namespace fk\pay\lib\AliPay\wap\service;
 
 use \Exception;
-use fk\pay\lib\alipay\aop\AopClient;
-use fk\pay\lib\alipay\aop\request\AliPayTradeWapPayRequest;
-use fk\pay\lib\alipay\wap\builders\BuilderInterface;
+use fk\pay\lib\AliPay\aop\AopClient;
+use fk\pay\lib\AliPay\aop\request\AliPayTradeWapPayRequest;
+use fk\pay\lib\AliPay\wap\builders\BuilderInterface;
 
 class AliPayTradeService
 {

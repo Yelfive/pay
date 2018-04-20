@@ -4,7 +4,7 @@
  * Maintained by Felix Huang <yelfivehuang@gmail.com>
  */
 
-namespace fk\pay\lib\alipay\aop\request;
+namespace fk\pay\lib\AliPay\aop\request;
 
 /**
  * ALIPAY API: koubei.marketing.campaign.crowd.batchquery request

@@ -5,7 +5,7 @@
  * @date 2017-05-23
  */
 
-namespace fk\pay\lib\alipay\wap\builders;
+namespace fk\pay\lib\AliPay\wap\builders;
 
 interface BuilderInterface
 {

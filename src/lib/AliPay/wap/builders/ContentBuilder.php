@@ -8,7 +8,7 @@
  * 以下代码只是为了方便商户测试而提供的样例代码，商户可以根据自己网站的需要，按照技术文档编写,并非一定要使用该代码。
  */
 
-namespace fk\pay\lib\alipay\wap\builders;
+namespace fk\pay\lib\AliPay\wap\builders;
 
 class ContentBuilder implements BuilderInterface
 {

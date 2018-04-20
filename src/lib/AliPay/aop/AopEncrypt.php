@@ -7,7 +7,7 @@
  * Date: 16/3/30
  * Time: 下午3:25
  */
-namespace fk\pay\lib\alipay\aop;
+namespace fk\pay\lib\AliPay\aop;
 
 class AopEncrypt
 {

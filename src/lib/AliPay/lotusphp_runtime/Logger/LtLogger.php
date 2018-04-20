@@ -1,6 +1,6 @@
 <?php
 
-namespace fk\pay\lib\alipay\lotusphp_runtime\Logger;
+namespace fk\pay\lib\AliPay\lotusphp_runtime\Logger;
 
 class LtLogger
 {
