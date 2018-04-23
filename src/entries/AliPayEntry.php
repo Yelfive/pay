@@ -35,7 +35,7 @@ class AliPayEntry extends Entry
 
     protected function setConfig()
     {
-        defined('AOP_SDK_WORK_DIR') or define('AOP_SDK_WORK_DIR', $this->config->getWorkingConfig('log_path') ?? dirname(__DIR__) . '/lib/AliPay');
+        defined('AOP_SDK_WORK_DIR') or define('AOP_SDK_WORK_DIR', $this->config->getWorkingConfig('log_path') ?? dirname(__DIR__) . '/lib/AliPay/logs');
     }
 
     public static function getStatuses()

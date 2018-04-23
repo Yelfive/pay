@@ -189,7 +189,7 @@ class AopClient
     {
         $localIp = isset ($_SERVER["SERVER_ADDR"]) ? $_SERVER["SERVER_ADDR"] : "CLI";
         $logger = new LtLogger;
-        $logger->conf["log_file"] = rtrim(AOP_SDK_WORK_DIR, '\\/') . '/' . "logs/aop_comm_err_" . $this->appId . "_" . date("Y-m-d") . ".log";
+        $logger->conf["log_file"] = rtrim(AOP_SDK_WORK_DIR, '\\/') . "/aop_comm_err_{$this->appId}_" . date("Y-m-d") . ".log";
         $logger->conf["separator"] = "^_^";
         $logData = array(
             date("Y-m-d H:i:s"),
