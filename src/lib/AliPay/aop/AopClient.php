@@ -187,12 +187,11 @@ class AopClient
 
     protected function logCommunicationError($apiName, $requestUrl, $errorCode, $responseTxt)
     {
-        $localIp = isset ($_SERVER["SERVER_ADDR"]) ? $_SERVER["SERVER_ADDR"] : "CLI";
+        $localIp = $_SERVER["SERVER_ADDR"] ?? 'CLI';
         $logger = new LtLogger;
         $logger->conf["log_file"] = rtrim(AOP_SDK_WORK_DIR, '\\/') . "/aop_comm_err_{$this->appId}_" . date("Y-m-d") . ".log";
-        $logger->conf["separator"] = "^_^";
-        $logData = array(
-            date("Y-m-d H:i:s"),
+        $logData = [
+            date('Y-m-d H:i:s'),
             $apiName,
             $this->appId,
             $localIp,
@@ -200,14 +199,14 @@ class AopClient
             $this->alipaySdkVersion,
             $requestUrl,
             $errorCode,
-            str_replace("\n", "", $responseTxt)
-        );
+            str_replace(["\n", "\r"], '', $responseTxt)
+        ];
         $logger->log($logData);
     }
 
     /**
      * 生成用于调用收银台SDK的字符串
-     * @param $request SDK接口的请求参数对象
+     * @param object $request SDK接口的请求参数对象
      * @return string
      * @author guofa.tgf
      */
@@ -438,7 +437,7 @@ class AopClient
         $respWellFormed = false;
 
         // 将返回结果转换本地文件编码
-        $r = iconv($this->postCharset, $this->fileCharset . "//IGNORE", $response);
+        $r = iconv('gb2312', $this->fileCharset, $response);
 
         $signData = null;
 
@@ -459,7 +458,7 @@ class AopClient
 
         //返回的HTTP文本不是标准JSON或者XML，记下错误日志
         if (false === $respWellFormed) {
-            $this->logCommunicationError($sysParams["method"], $requestUrl, "HTTP_RESPONSE_NOT_WELL_FORMED", $response);
+            $this->logCommunicationError($sysParams["method"], $requestUrl, "HTTP_RESPONSE_NOT_WELL_FORMED", $r);
             return false;
         }
 

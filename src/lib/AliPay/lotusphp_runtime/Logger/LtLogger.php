@@ -4,37 +4,29 @@ namespace fk\pay\lib\AliPay\lotusphp_runtime\Logger;
 
 class LtLogger
 {
-    public $conf = array(
-        "separator" => "\t",
-        "log_file" => ""
-    );
+    public $conf = [
+        'log_file' => ''
+    ];
 
-    private $fileHandle;
+    private $_handle;
 
-    protected function getFileHandle()
+    protected function getHandle()
     {
-        if (null === $this->fileHandle) {
-            if (empty($this->conf["log_file"])) {
-                trigger_error("no log file spcified.");
+        if (null === $this->_handle) {
+            if (empty($this->conf['log_file'])) {
+                trigger_error('no log file specified.');
             }
-            $logDir = dirname($this->conf["log_file"]);
-            if (!is_dir($logDir)) {
-                mkdir($logDir, 0777, true);
-            }
-            $this->fileHandle = fopen($this->conf["log_file"], "a");
+            $log_path = dirname($this->conf['log_file']);
+            if (!is_dir($log_path)) mkdir($log_path, 0777, true);
+            $this->_handle = fopen($this->conf['log_file'], 'a');
         }
-        return $this->fileHandle;
+        return $this->_handle;
     }
 
     public function log($logData)
     {
-        if ("" == $logData || array() == $logData) {
-            return false;
-        }
-        if (is_array($logData)) {
-            $logData = implode($this->conf["separator"], $logData);
-        }
-        $logData = $logData . "\n";
-        fwrite($this->getFileHandle(), $logData);
+        if (!$logData) return false;
+        fwrite($handle = $this->getHandle(), print_r($logData, true) . PHP_EOL);
+        fclose($handle);
     }
 }
