@@ -16,6 +16,8 @@ abstract class Entry implements EntryInterface
 
     protected $config;
 
+    public $response;
+
     public function __construct(PlatformsConfig $config)
     {
         $this->config = $config;

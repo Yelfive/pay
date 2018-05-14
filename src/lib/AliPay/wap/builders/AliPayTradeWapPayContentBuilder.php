@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\wap\builders;
+
 /* *
  * 功能：支付宝手机网站支付接口(alipay.trade.wap.pay)接口业务参数封装
  * 版本：2.0
@@ -11,8 +13,6 @@
 /**
  * Maintained by Felix Huang <yelfivehuang@gmail.com>
  */
-
-namespace fk\pay\lib\AliPay\wap\builders;
 
 class AliPayTradeWapPayContentBuilder implements BuilderInterface
 {

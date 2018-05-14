@@ -12,6 +12,7 @@ use fk\pay\Exception;
 use fk\pay\lib\WeChat\Config;
 use fk\pay\lib\WeChat\JsApi;
 use fk\pay\lib\WeChat\Pay;
+use fk\pay\lib\WeChat\Refund;
 use fk\pay\lib\WeChat\Result;
 use fk\pay\lib\WeChat\TransferData;
 use fk\pay\lib\WeChat\UnifiedOrderData;
@@ -142,5 +143,28 @@ class WeChatEntry extends Entry
                 Config::$$property = $v;
             }
         }
+    }
+
+    /**
+     * @param string $order_sn
+     * @param string $refund_sn
+     * @param float $total_amount
+     * @param null|float $refund_amount
+     * @return bool Whether refund succeeded.
+     */
+    public function refund($order_sn, $refund_sn, $total_amount, $refund_amount = null): bool
+    {
+        $total_fee = round($total_amount * 100);
+        $refund_fee = round(100 * ($refund_amount ?: $total_amount));
+
+        $refund = new Refund();
+        $refund->SetOut_trade_no($order_sn);
+        $refund->SetOut_refund_no($refund_sn);
+        $refund->SetTotal_fee($total_fee);
+        $refund->SetRefund_fee($refund_fee);
+
+        $this->response = Pay::refund($refund);
+
+        return $this->response['return_code'] === 'SUCCESS';
     }
 }

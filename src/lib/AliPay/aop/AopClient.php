@@ -437,7 +437,11 @@ class AopClient
         $respWellFormed = false;
 
         // 将返回结果转换本地文件编码
-        $r = iconv('gb2312', $this->fileCharset, $response);
+        try {
+            $r = iconv('gb2312', $this->fileCharset, $response);
+        } catch (\Exception $e) {
+            $r = $response;
+        }
 
         $signData = null;
 

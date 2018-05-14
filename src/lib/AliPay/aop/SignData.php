@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\aop;
+
 /**
  * Created by PhpStorm.
  * User: jiehua

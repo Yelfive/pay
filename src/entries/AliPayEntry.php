@@ -7,6 +7,7 @@
 
 namespace fk\pay\entries;
 
+use fk\pay\lib\AliPay\wap\builders\AliPayTradeRefundContentBuilder;
 use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
 use fk\pay\lib\AliPay\wap\builders\AliPayTradeWapPayContentBuilder;
 
@@ -32,6 +33,8 @@ class AliPayEntry extends Entry
 
     const NOTIFY_RESULT_SUCCESS = 'success';
     const NOTIFY_RESULT_FAILED = 'failed';
+
+    public $response;
 
     protected function setConfig()
     {
@@ -67,9 +70,9 @@ class AliPayEntry extends Entry
         $builder->setTimeExpress($extra['time_express'] ?? '1d');
 
         $service = new AliPayTradeService($this->config->getWorkingConfig());
-        $result = $service->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
+        $this->response = $service->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
 
-        return $result;
+        return $this->response;
     }
 
     /**
@@ -81,5 +84,25 @@ class AliPayEntry extends Entry
     {
         $valid = (new AliPayTradeService($this->config->getWorkingConfig()))->check($data);
         return is_bool($valid) ? $valid : false;
+    }
+
+    /**
+     * @param string $order_sn
+     * @param string $refund_sn
+     * @param string $total_amount
+     * @param null $refund_amount
+     * @return bool Whether refund succeeded.
+     */
+    public function refund($order_sn, $refund_sn, $total_amount, $refund_amount = null): bool
+    {
+        $request = new AlipayTradeRefundContentBuilder();
+        $request->setOutTradeNo($order_sn);
+        $request->setRefundAmount($total_amount);
+        $request->setRefundReason('No reason');
+        $request->setOutRequestNo($refund_sn);
+
+        $service = new AlipayTradeService($this->config->getWorkingConfig());
+        $this->response = $service->Refund($request);
+        return $this->response->code == '10000';
     }
 }

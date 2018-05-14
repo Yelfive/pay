@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\wap\service;
+
 /* *
  * 功能：支付宝手机网站alipay.data.dataservice.bill.downloadurl.query (查询对账单下载地址)接口业务参数封装
  * 版本：2.0
@@ -7,7 +9,6 @@
  * 说明：
  * 以下代码只是为了方便商户测试而提供的样例代码，商户可以根据自己网站的需要，按照技术文档编写,并非一定要使用该代码。
  */
-
 
 class AlipayDataDataserviceBillDownloadurlQueryContentBuilder
 {

@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\wap\builders;
+
 /* *
  * 功能：支付宝手机网站退款接口(alipay.trade.refund)接口业务参数封装
  * 版本：2.0

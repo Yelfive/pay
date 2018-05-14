@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\wap\service;
+
 /* *
  * 功能：支付宝手机网站alipay.trade.close (统一收单交易关闭接口)业务参数封装
  * 版本：2.0
@@ -11,11 +13,12 @@
 //require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . './../../AopSdk.php';
 //require dirname(__FILE__) . DIRECTORY_SEPARATOR . './../../config.php';
 
-namespace fk\pay\lib\AliPay\wap\service;
 
 use \Exception;
 use fk\pay\lib\AliPay\aop\AopClient;
+use fk\pay\lib\AliPay\aop\request\AliPayTradeRefundRequest;
 use fk\pay\lib\AliPay\aop\request\AliPayTradeWapPayRequest;
+use fk\pay\lib\AliPay\wap\builders\AliPayTradeRefundContentBuilder;
 use fk\pay\lib\AliPay\wap\builders\BuilderInterface;
 
 class AliPayTradeService
@@ -151,8 +154,8 @@ class AliPayTradeService
 
     /**
      * alipay.trade.refund (统一收单交易退款接口)
-     * @param $builder 业务参数，使用buildmodel中的对象生成。
-     * @return $response 支付宝返回的信息
+     * @param AlipayTradeRefundContentBuilder $builder 业务参数，使用buildmodel中的对象生成。
+     * @return \stdClass $response 支付宝返回的信息
      */
     public function Refund($builder)
     {
@@ -165,13 +168,12 @@ class AliPayTradeService
         // 首先调用支付api
         $response = $this->aopclientRequestExecute($request);
         $response = $response->alipay_trade_refund_response;
-        var_dump($response);
         return $response;
     }
 
     /**
      * alipay.trade.close (统一收单交易关闭接口)
-     * @param $builder 业务参数，使用buildmodel中的对象生成。
+     * @param AlipayTradeRefundContentBuilder $builder 业务参数，使用buildmodel中的对象生成。
      * @return $response 支付宝返回的信息
      */
     public function Close($builder)
@@ -244,7 +246,7 @@ class AliPayTradeService
     //请确保项目文件有可写权限，不然打印不了日志。
     public function writeLog($text)
     {
-        file_put_contents(AOP_SDK_WORK_DIR . '/ali-pay.log', '[' . date("Y-m-d H:i:s") . "]  \n", FILE_APPEND);
+        file_put_contents(AOP_SDK_WORK_DIR . '/ali-pay.log', '[' . date("Y-m-d H:i:s") . "] $text\n", FILE_APPEND);
     }
 
 

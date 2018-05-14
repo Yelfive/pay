@@ -27,4 +27,13 @@ interface EntryInterface
      * @return mixed result of notify, success or error, differs from different platform
      */
     public function notify(callable $callback);
+
+    /**
+     * @param $order_sn
+     * @param $refund_sn
+     * @param $total_amount
+     * @param null $refund_amount
+     * @return bool Whether refund succeeded.
+     */
+    public function refund($order_sn, $refund_sn, $total_amount, $refund_amount = null): bool;
 }

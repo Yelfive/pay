@@ -1,5 +1,7 @@
 <?php
 
+namespace fk\pay\lib\AliPay\wap\builders;
+
 /* *
  * 功能：共有有参数，暂未使用本页面
  * 版本：2.0
@@ -7,8 +9,6 @@
  * 说明：
  * 以下代码只是为了方便商户测试而提供的样例代码，商户可以根据自己网站的需要，按照技术文档编写,并非一定要使用该代码。
  */
-
-namespace fk\pay\lib\AliPay\wap\builders;
 
 class ContentBuilder implements BuilderInterface
 {

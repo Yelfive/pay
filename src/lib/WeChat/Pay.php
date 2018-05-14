@@ -147,7 +147,7 @@ class Pay
         } else if (!$inputObj->IsRefund_feeSet()) {
             throw new Exception("退款申请接口中，缺少必填参数refund_fee！");
         } else if (!$inputObj->IsOp_user_idSet()) {
-            throw new Exception("退款申请接口中，缺少必填参数op_user_id！");
+//            throw new Exception("退款申请接口中，缺少必填参数 op_user_id！");
         }
         $inputObj->SetAppid(Config::$APP_ID);//公众账号ID
         $inputObj->SetMch_id(Config::$MCH_ID);//商户号
