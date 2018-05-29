@@ -54,7 +54,13 @@ class AliPayEntry extends Entry
      * @param float $amount
      * @param string $name
      * @param string $description
-     * @param array $extra
+     * @param array $extra <pre>
+     *  [
+     *      'expires_in_seconds' => 600, // optional
+     *      'return_url' => '', required
+     *  ]
+     * </pre>
+     *
      * @return mixed
      * @throws \Exception
      * @throws \fk\pay\Exception
@@ -67,7 +73,9 @@ class AliPayEntry extends Entry
         $builder->setTotalAmount($amount);
         $builder->setBody($description);
         $builder->setSubject($name);
-        $builder->setTimeExpress($extra['time_express'] ?? '1d');
+        if (isset($extra['expires_in_seconds'])) {
+            $builder->setTimeExpress(sprintf('%dm', $extra['expires_in_seconds'] / 60));
+        }
 
         $service = new AliPayTradeService($this->config->getWorkingConfig());
         $this->response = $service->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));

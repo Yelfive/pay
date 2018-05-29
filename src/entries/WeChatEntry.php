@@ -29,13 +29,15 @@ class WeChatEntry extends Entry
      * @param string|array $description
      * @param array $extra This should be identical to WeChat unified pay params,
      * In the form of `param => value`
-     * e.g.
+     * e.g.<pre>
      * ```php
      *  [
      *      'trade_type' => 'JSAPI', // required, JSAPI, NATIVE, APP
      *      'time_start' => 1412345678, // optional
+     *      'expires_in_seconds' => 600, // optional
      *  ]
      * ```
+     * </pre>
      * @return array
      * @throws Exception
      * @throws \fk\pay\lib\WeChat\Exception
@@ -51,17 +53,15 @@ class WeChatEntry extends Entry
         $order->SetDetail($description);
         $order->SetOut_trade_no($orderSn);
         $order->SetTotal_fee(round($amount * 100));
+        if (isset($extra['expires_in_seconds'])) {
+            $order->SetTime_expire(date('YmdHis', time() + (int)$extra['expires_in_seconds']));
+        }
 
         $this->required($extra, ['trade_type'], '"{attribute}" is required in `$extra`');
 
         $order->SetTrade_type($extra['trade_type']);
 
         $order->SetNotify_url($this->config->getWorkingConfig('notify_url'));
-        // Set extra params
-        foreach ($extra as $k => &$v) {
-            $method = 'Set' . ucfirst($k);
-            if (method_exists($order, $method)) $order->$method($v);
-        }
 
         $result = Pay::unifiedOrder($order);
         if ($result['return_code'] === 'FAIL') {
