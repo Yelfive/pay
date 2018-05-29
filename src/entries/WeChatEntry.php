@@ -35,6 +35,7 @@ class WeChatEntry extends Entry
      *      'trade_type' => 'JSAPI', // required, JSAPI, NATIVE, APP
      *      'time_start' => 1412345678, // optional
      *      'expires_in_seconds' => 600, // optional
+     *      'redirect_url',
      *  ]
      * ```
      * </pre>
@@ -55,13 +56,20 @@ class WeChatEntry extends Entry
         $order->SetTotal_fee(round($amount * 100));
         if (isset($extra['expires_in_seconds'])) {
             $order->SetTime_expire(date('YmdHis', time() + (int)$extra['expires_in_seconds']));
+            unset($extra['expires_in_seconds']);
         }
 
         $this->required($extra, ['trade_type'], '"{attribute}" is required in `$extra`');
 
         $order->SetTrade_type($extra['trade_type']);
+        unset($extra['trade_type']);
 
         $order->SetNotify_url($this->config->getWorkingConfig('notify_url'));
+        // Set extra params
+        foreach ($extra as $k => &$v) {
+            $method = 'Set' . ucfirst($k);
+            if (method_exists($order, $method)) $order->$method($v);
+        }
 
         $result = Pay::unifiedOrder($order);
         if ($result['return_code'] === 'FAIL') {
