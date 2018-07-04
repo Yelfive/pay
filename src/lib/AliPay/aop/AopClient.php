@@ -158,6 +158,7 @@ class AopClient
             $headers = ['content-type: application/x-www-form-urlencoded;charset=' . $this->postCharset];
         }
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_REFERER, 'http://tt.84test.mylord.cn/web/receipt/0/ok');
 
         $response = curl_exec($ch);
 
@@ -351,7 +352,7 @@ class AopClient
     }
 
     /**
-     * @param AliPayTradeWapPayRequest $request
+     * @param AliPayTradeWapPayRequest|mixed $request
      * @param null $authToken
      * @param null $appInfoAuthtoken
      * @return bool|mixed|\SimpleXMLElement

@@ -96,5 +96,3 @@ class AliPayTradeRefundContentBuilder
         $this->bizContentarr['out_request_no'] = $outRequestNo;
     }
 }
-
-?>

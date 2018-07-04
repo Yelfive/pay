@@ -7,6 +7,10 @@
 
 namespace fk\pay\entries;
 
+use fk\pay\lib\AliPay\aop\AopClient;
+use fk\pay\lib\AliPay\aop\request\AlipayFundTransToaccountTransferRequest;
+use fk\pay\lib\AliPay\aop\request\AliPayTransferThirdpartyBillCreateRequest;
+use fk\pay\lib\AliPay\result\TransferResult;
 use fk\pay\lib\AliPay\wap\builders\AliPayTradeRefundContentBuilder;
 use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
 use fk\pay\lib\AliPay\wap\builders\AliPayTradeWapPayContentBuilder;
@@ -112,5 +116,50 @@ class AliPayEntry extends Entry
         $service = new AlipayTradeService($this->config->getWorkingConfig());
         $this->response = $service->Refund($request);
         return $this->response->code == '10000';
+    }
+
+    public const TRANSFER_PAYEE_TYPE_UID = 'ALIPAY_USERID';
+    public const TRANSFER_PAYEE_TYPE_LID = 'ALIPAY_LOGONID';
+
+    /**
+     * @param string $payee_account
+     * @param string $transfer_sn
+     * @param float $amount
+     * @param string $remark [optional]
+     * @param string $payee_type [optional] ALIPAY_USERID or ALIPAY_LOGONID
+     * @param string $payer_show_name [optional]
+     * @param string $payee_real_name [optional]
+     * @return TransferResult
+     */
+    public function transfer($payee_account, $transfer_sn, $amount, $remark = null, $payee_real_name = null, $payee_type = 'ALIPAY_USERID', $payer_show_name = null)
+    {
+        $aop = new AopClient();
+        $aop->gatewayUrl = $this->config('gatewayUrl');
+        $aop->appId = $this->config('app_id');
+        $aop->rsaPrivateKey = $this->config('merchant_private_key');
+        $aop->alipayrsaPublicKey = $this->config('alipay_public_key');
+        $aop->apiVersion = '1.0';
+        $aop->signType = 'RSA2';
+        $aop->postCharset = 'UTF-8';
+        $aop->format = 'json';
+        $request = new AlipayFundTransToaccountTransferRequest();
+        $request->setBizContent(json_encode(array_filter([
+            'out_biz_no' => $transfer_sn,
+            'payee_type' => $payee_type,
+            'payee_account' => $payee_account,
+            'amount' => round($amount, 2),
+            'payer_show_name' => $payer_show_name,
+            'payee_real_name' => $payee_real_name,
+            'remark' => $remark,
+        ], function ($v) {
+            return $v !== null;
+        }), JSON_UNESCAPED_UNICODE));
+        $result = $aop->execute($request);
+        return new TransferResult($result);
+    }
+
+    protected function config($name)
+    {
+        return $this->config->getWorkingConfig($name);
     }
 }

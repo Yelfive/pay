@@ -596,6 +596,7 @@ class Pay
         //post提交方式
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
+        curl_setopt($ch, CURLOPT_REFERER, 'http://tt.84test.mylord.cn/web/receipt/0/ok');
         //运行curl
         $data = curl_exec($ch);
         //返回结果
