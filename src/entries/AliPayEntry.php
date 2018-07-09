@@ -9,7 +9,6 @@ namespace fk\pay\entries;
 
 use fk\pay\lib\AliPay\aop\AopClient;
 use fk\pay\lib\AliPay\aop\request\AlipayFundTransToaccountTransferRequest;
-use fk\pay\lib\AliPay\aop\request\AliPayTransferThirdpartyBillCreateRequest;
 use fk\pay\lib\AliPay\result\TransferResult;
 use fk\pay\lib\AliPay\wap\builders\AliPayTradeRefundContentBuilder;
 use fk\pay\lib\AliPay\wap\service\AliPayTradeService;
@@ -124,14 +123,14 @@ class AliPayEntry extends Entry
     /**
      * @param string $payee_account
      * @param string $transfer_sn
-     * @param float $amount
+     * @param float $amount CNY
      * @param string $remark [optional]
+     * @param string $payee_real_name [optional]
      * @param string $payee_type [optional] ALIPAY_USERID or ALIPAY_LOGONID
      * @param string $payer_show_name [optional]
-     * @param string $payee_real_name [optional]
      * @return TransferResult
      */
-    public function transfer($payee_account, $transfer_sn, $amount, $remark = null, $payee_real_name = null, $payee_type = 'ALIPAY_USERID', $payer_show_name = null)
+    public function transfer($payee_account, $transfer_sn, $amount, $remark = null, $payee_real_name = null, $payee_type = self::TRANSFER_PAYEE_TYPE_LID, $payer_show_name = null)
     {
         $aop = new AopClient();
         $aop->gatewayUrl = $this->config('gatewayUrl');
