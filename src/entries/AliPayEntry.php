@@ -70,6 +70,9 @@ class AliPayEntry extends Entry
      */
     public function pay(string $orderSn, float $amount, string $name, string $description, array $extra = [])
     {
+        // AliPay needs a encode
+        $name = urlencode($name);
+        $description = urlencode($description);
         $this->required($extra, ['return_url']);
         $builder = new AliPayTradeWapPayContentBuilder();
         $builder->setOutTradeNo($orderSn);
