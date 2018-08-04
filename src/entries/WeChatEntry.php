@@ -107,6 +107,11 @@ class WeChatEntry extends Entry
                     'redirect' => $location
                 ];
                 break;
+            case Constant::WECHAT_TRADE_TYPE_NATIVE:
+                $data = [
+                    'pay_uri' => $result['code_url']
+                ];
+                break;
             default:
                 $data = [];
         }

@@ -16,6 +16,7 @@ namespace fk\pay\lib\AliPay\wap\service;
 
 use \Exception;
 use fk\pay\lib\AliPay\aop\AopClient;
+use fk\pay\lib\AliPay\aop\request\AliPayTradePreCreateRequest;
 use fk\pay\lib\AliPay\aop\request\AliPayTradeRefundRequest;
 use fk\pay\lib\AliPay\aop\request\AliPayTradeWapPayRequest;
 use fk\pay\lib\AliPay\wap\builders\AliPayTradeRefundContentBuilder;
@@ -105,6 +106,27 @@ class AliPayTradeService
         // 首先调用支付api
         $response = $this->aopClientRequestExecute($request, $this->redirectWithHtml);
         return $response;
+    }
+
+    /**
+     * alipay.trade.precreate
+     * @param BuilderInterface $builder
+     * @param string $notify_url
+     * @return array
+     */
+    public function preCreate($builder, $notify_url)
+    {
+
+        $biz_content = $builder->getBizContent();
+        //打印业务参数
+        $this->writeLog($biz_content);
+
+        $request = new AliPayTradePreCreateRequest();
+
+        $request->setNotifyUrl($notify_url);
+        $request->setBizContent($biz_content);
+
+        return $this->aopClientRequestExecute($request, $this->redirectWithHtml);
     }
 
     public function aopClientRequestExecute($request, $outputHtml = false)

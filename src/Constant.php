@@ -15,6 +15,9 @@ class Constant
     public const WECHAT_TRADE_TYPE_APP = 'APP';
     public const WECHAT_TRADE_TYPE_H5 = 'MWEB';
 
+    // Pay with QRCode
+    public const ALIPAY_TRADE_TYPE_QR = 'QR';
+
     public const PLATFORM_WECHAT = 'WeChat';
     public const PLATFORM_ALIPAY = 'AliPay';
 

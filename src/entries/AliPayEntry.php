@@ -7,6 +7,7 @@
 
 namespace fk\pay\entries;
 
+use fk\pay\Constant;
 use fk\pay\lib\AliPay\aop\AopClient;
 use fk\pay\lib\AliPay\aop\request\AlipayFundTransToaccountTransferRequest;
 use fk\pay\lib\AliPay\result\TransferResult;
@@ -37,6 +38,9 @@ class AliPayEntry extends Entry
     const NOTIFY_RESULT_SUCCESS = 'success';
     const NOTIFY_RESULT_FAILED = 'failed';
 
+    /**
+     * @var mixed
+     */
     public $response;
 
     protected function setConfig()
@@ -60,11 +64,12 @@ class AliPayEntry extends Entry
      * @param array $extra <pre>
      *  [
      *      'expires_in_seconds' => 600, // optional
-     *      'return_url' => '', required
+     *      'return_url' => '', // required
+     *      'trade_type' => Constant::ALIPAY_TRADE_TYPE_QR, // required when for QRCode paying
      *  ]
      * </pre>
      *
-     * @return mixed
+     * @return array
      * @throws \Exception
      * @throws \fk\pay\Exception
      */
@@ -73,7 +78,6 @@ class AliPayEntry extends Entry
         // AliPay needs a encode
         $name = urlencode($name);
         $description = urlencode($description);
-        $this->required($extra, ['return_url']);
         $builder = new AliPayTradeWapPayContentBuilder();
         $builder->setOutTradeNo($orderSn);
         $builder->setTotalAmount($amount);
@@ -84,9 +88,19 @@ class AliPayEntry extends Entry
         }
 
         $service = new AliPayTradeService($this->config->getWorkingConfig());
-        $this->response = $service->wapPay($builder, $extra['return_url'], $this->config->getWorkingConfig('notify_url'));
 
-        return $this->response;
+        $notifyUri = $this->config->getWorkingConfig('notify_url');
+        if (isset($extra['trade_type']) && $extra['trade_type'] === Constant::ALIPAY_TRADE_TYPE_QR) {
+            $this->response = $service->preCreate($builder, $notifyUri);
+            $result = [
+                'pay_uri' => $this->response->alipay_trade_precreate_response->qr_code,
+            ];
+        } else {
+            $this->required($extra, ['return_url']);
+            $result = $this->response = $service->wapPay($builder, $extra['return_url'], $notifyUri);
+        }
+
+        return $result;
     }
 
     /**

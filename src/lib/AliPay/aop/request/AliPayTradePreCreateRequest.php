@@ -12,22 +12,22 @@ namespace fk\pay\lib\AliPay\aop\request;
  * @author auto create
  * @since 1.0, 2016-12-08 00:40:23
  */
-class AliPayTradePrecreateRequest
+class AliPayTradePreCreateRequest
 {
     /**
      * 收银员通过收银台或商户后台调用支付宝接口，生成二维码后，展示给伤脑筋户，由用户扫描二维码完成订单支付。
      * 修改路由策略到R
      **/
-    private $bizContent;
+    protected $bizContent;
 
-    private $apiParas = array();
-    private $terminalType;
-    private $terminalInfo;
-    private $prodCode;
-    private $apiVersion = "1.0";
-    private $notifyUrl;
-    private $returnUrl;
-    private $needEncrypt = false;
+    protected $apiParas = array();
+    protected $terminalType;
+    protected $terminalInfo;
+    protected $prodCode;
+    protected $apiVersion = "1.0";
+    protected $notifyUrl;
+    protected $returnUrl;
+    protected $needEncrypt = false;
 
     public function setBizContent($bizContent)
     {

@@ -49,4 +49,9 @@ class OrderHelper
         $sn = "$category$ts$rand$pk";
         return $sn;
     }
+
+    public function isCategory($orderSn, $category, $length = 2): bool
+    {
+        return 0 === strncmp($orderSn, $category, $length);
+    }
 }
